@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 
-const healthRoutes = require("./routes/healthRoutes");
-const authRoutes = require("./routes/authRoutes");
-const testRoutes = require("./routes/testRoutes");
-const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+const healthRoutes = require("./routes/health.routes");
+const authRoutes = require("./routes/auth.routes");
+const testRoutes = require("./routes/test.routes");
+const { notFound, errorHandler } = require("./middleware/error.middleware");
 
 const app = express();
 

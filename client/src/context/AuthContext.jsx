@@ -23,16 +23,28 @@ export const AuthProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
-  const login = async (email, password) => {
-    const response = await api.post("/auth/login", { email, password });
-    const { token: newToken, user: loggedInUser } = response.data;
-
+  /**
+   * Shared by login() and register() - both endpoints return the same
+   * { token, user } shape and both should result in the same
+   * "now logged in" state, so this avoids repeating the same four
+   * lines twice.
+   */
+  const setSession = (newToken, loggedInUser) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(loggedInUser));
-
     setToken(newToken);
     setUser(loggedInUser);
+  };
 
+  const login = async (email, password) => {
+    const response = await api.post("/auth/login", { email, password });
+    setSession(response.data.token, response.data.user);
+    navigate("/dashboard");
+  };
+
+  const register = async (name, email, password) => {
+    const response = await api.post("/auth/register", { name, email, password });
+    setSession(response.data.token, response.data.user);
     navigate("/dashboard");
   };
 
@@ -45,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,6 @@
 import { useAuth } from "../context/AuthContext.jsx";
 
-/**
- * Intentionally minimal for Day 1. This will later show role-specific
- * statistics, article lists, and workflow actions - none of that is
- * implemented yet.
- */
+
 const Dashboard = () => {
   const { user, logout } = useAuth();
 
