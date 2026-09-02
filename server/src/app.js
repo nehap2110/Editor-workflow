@@ -5,6 +5,7 @@ const healthRoutes = require("./routes/health.routes");
 const authRoutes = require("./routes/auth.routes");
 const testRoutes = require("./routes/test.routes");
 const { notFound, errorHandler } = require("./middleware/error.middleware");
+const articleRoutes = require("./routes/article.routes");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
+app.use("/api/articles", articleRoutes);
 
 // --- Error handling (must be registered last) ---
 app.use(notFound);
