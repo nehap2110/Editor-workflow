@@ -9,6 +9,8 @@ import MyArticles from "./pages/MyArticles";
 import ArticleDetail from "./pages/ArticleDetail";
 import EditorReviewArticle from "./pages/EditorReviewArticle";
 import PublishedArticles from "./pages/PublishedArticles";
+import RoleRoute from "./routes/RoleRoute.jsx";
+import ApprovedArticles from "./pages/ApprovedArticles";
 
 function App() {
   return (
@@ -25,37 +27,45 @@ function App() {
       />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      <Route
-       path="/editor/review"
-        element={
-       <ProtectedRoute>
-        <EditorReview />
-       </ProtectedRoute>
+
+     <Route path="/editor/review"
+         element={
+          <ProtectedRoute>
+          <RoleRoute allowedRoles={["editor"]}>
+          <EditorReview />
+          </RoleRoute>
+          </ProtectedRoute>
+         }
+        />
+
+     <Route path="/articles/new"
+          element={
+            <ProtectedRoute>
+             <RoleRoute allowedRoles={["writer"]}>
+             <ArticleEditor />
+             </RoleRoute>
+            </ProtectedRoute>
         }
       />
 
-      <Route path="/articles/new"
-             element={
-            <ProtectedRoute>
-            <ArticleEditor />
-            </ProtectedRoute>
-           }
-       />
-
-      <Route path="/articles/:id/edit"
+     <Route path="/articles/:id/edit"
            element={
-          <ProtectedRoute>
-         <ArticleEditor />
-         </ProtectedRoute>
+            <ProtectedRoute>
+             <RoleRoute allowedRoles={["writer"]}>
+              <ArticleEditor />
+             </RoleRoute>
+            </ProtectedRoute>
           }
-      />
+     />
 
-      <Route  path="/articles/my"
+      <Route path="/articles/my"
              element={
-             <ProtectedRoute>
-             <MyArticles />
-             </ProtectedRoute>
-             }
+              <ProtectedRoute>
+               <RoleRoute allowedRoles={["writer"]}>
+               <MyArticles />
+               </RoleRoute>
+              </ProtectedRoute>
+           }
         />
 
       <Route path="/articles/:id"
@@ -67,12 +77,22 @@ function App() {
       />
 
       <Route path="/editor/review/:id"
-       element={
-       <ProtectedRoute>
-        <EditorReviewArticle />
-       </ProtectedRoute>
-       }
-      />
+           element={
+           <ProtectedRoute>
+            <RoleRoute allowedRoles={["editor"]}>
+             <EditorReviewArticle />
+            </RoleRoute>
+           </ProtectedRoute>
+          }
+       />
+
+       <Route path="/editor/approved"
+         element={
+          <ProtectedRoute>
+           <ApprovedArticles />
+          </ProtectedRoute>
+         }
+        />
 
        <Route path="/published"
         element={

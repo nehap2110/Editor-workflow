@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import BackButton from "../components/BackButton.jsx";
 
 const MyArticles = () => {
   const navigate = useNavigate();
@@ -103,6 +104,13 @@ const MyArticles = () => {
 
       {/* Main */}
       <main className="mx-auto max-w-6xl px-6 py-8">
+          {/*back button */}
+          
+          <div className="mb-6">
+         <BackButton label="Back to Dashboard" />
+         </div>
+
+
         {/* Error */}
         {error && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">

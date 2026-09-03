@@ -434,6 +434,39 @@ const getReviewArticles = async (req, res) => {
 };
 
 
+
+
+// ==========================================
+// GET APPROVED ARTICLES
+// GET /api/articles/approved
+// Editor only
+// ==========================================
+const getApprovedArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({
+      status: "APPROVED",
+    })
+      .populate("author", "name email role")
+      .populate("approvedBy", "name email role")
+      .sort({ approvedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: articles.length,
+      articles,
+    });
+  } catch (error) {
+    console.error("Get approved articles error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while fetching approved articles",
+    });
+  }
+};
+
+
 // ==========================================
 // REQUEST CHANGES
 // POST /api/articles/:id/request-changes
@@ -540,6 +573,93 @@ const approveArticle = async (req, res) => {
 };
 
 
+
+// ==========================================
+// SCHEDULE ARTICLE
+// POST /api/articles/:id/schedule
+// Editor only
+// ==========================================
+const scheduleArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { scheduledAt } = req.body;
+
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Only approved articles can be scheduled
+    if (article.status !== "APPROVED") {
+      return res.status(400).json({
+        success: false,
+        message: "Only approved articles can be scheduled",
+      });
+    }
+
+    // Validate scheduled time
+    if (!scheduledAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Scheduled date and time are required",
+      });
+    }
+
+    const scheduleDate = new Date(scheduledAt);
+
+    if (isNaN(scheduleDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid scheduled date and time",
+      });
+    }
+
+    // Scheduled time must be in the future
+    if (scheduleDate <= new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Scheduled time must be in the future",
+      });
+    }
+
+    article.status = "SCHEDULED";
+    article.scheduledAt = scheduleDate;
+    article.scheduledBy = req.user._id;
+
+    await article.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Article scheduled successfully",
+      article,
+    });
+  } catch (error) {
+    console.error("Schedule article error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while scheduling article",
+    });
+  }
+};
+
+
+// ==========================================
+// PUBLISH ARTICLE
+// POST /api/articles/:id/publish
+// Editor only
+// ==========================================
 // ==========================================
 // PUBLISH ARTICLE
 // POST /api/articles/:id/publish
@@ -559,20 +679,17 @@ const publishArticle = async (req, res) => {
     }
 
     // ======================================
-    // CHECK STATUS
+    // ONLY APPROVED ARTICLES CAN BE
+    // PUBLISHED IMMEDIATELY
     // ======================================
 
     if (article.status !== "APPROVED") {
       return res.status(400).json({
         success: false,
         message:
-          "Only approved articles can be published",
+          "Only approved articles can be published immediately",
       });
     }
-
-    // ======================================
-    // PUBLISH
-    // ======================================
 
     article.status = "PUBLISHED";
     article.publishedAt = new Date();
@@ -602,7 +719,6 @@ const publishArticle = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // GET PUBLISHED ARTICLES
 // GET /api/articles/published
@@ -647,9 +763,12 @@ module.exports = {
   updateArticle,
   submitArticle,
   getReviewArticles,
+  getApprovedArticles,
   requestChanges,
   approveArticle,
-  publishArticle
+  scheduleArticle,
+  publishArticle,
+ 
 };
   
   

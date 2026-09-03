@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../services/api";
+import BackButton from "../components/BackButton.jsx";
 
 const ArticleEditor = () => {
   const { id } = useParams();
@@ -217,9 +218,8 @@ const handleSave = async () => {
           "Article submitted for review successfully."
         );
 
-        navigate(`/articles/${article._id}/edit`, {
-          replace: true,
-        });
+       navigate("/articles/my");
+
       } catch (err) {
         console.error("Submit article error:", err);
 
@@ -253,6 +253,11 @@ const handleSave = async () => {
       setSuccess(
         "Article submitted for review successfully."
       );
+       
+      setTimeout(() => {
+       navigate("/articles/my");
+       }, 800);
+
     } catch (err) {
       console.error("Submit article error:", err);
 
@@ -316,6 +321,8 @@ const handleSave = async () => {
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-8">
+
+        <BackButton />
         {/* Error */}
         {error && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">

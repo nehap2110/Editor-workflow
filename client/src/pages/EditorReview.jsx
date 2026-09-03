@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import BackButton from "../components/BackButton.jsx";
 
 const EditorReview = () => {
   const [articles, setArticles] = useState([]);
@@ -55,6 +56,11 @@ const EditorReview = () => {
 
   return (
     <div className="p-6">
+      
+      <div className="mb-6">
+    <BackButton label="Back to Dashboard" />
+      </div>
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
           Articles for Review

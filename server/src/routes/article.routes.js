@@ -7,8 +7,10 @@ const {
   updateArticle,
   submitArticle,
   getReviewArticles,
+  getApprovedArticles,
   requestChanges,
   approveArticle,
+  scheduleArticle,
   getPublishedArticles,
 } = require("../controllers/article.controller");
 
@@ -49,6 +51,26 @@ router.get(
   protect,
   requireRole("editor"),
   getReviewArticles
+);
+
+// ==========================================
+// GET APPROVED ARTICLES
+// GET /api/articles/approved
+// Editor only
+// ==========================================
+
+router.get(
+  "/approved",
+  protect,
+  requireRole("editor"),
+  getApprovedArticles
+);
+
+router.post(
+  "/:id/schedule",
+  protect,
+  requireRole("editor"),
+  scheduleArticle
 );
 
 

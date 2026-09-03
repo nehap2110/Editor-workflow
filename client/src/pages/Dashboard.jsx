@@ -1,121 +1,433 @@
+
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import Navbar from "../components/Navbar.jsx";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [articles, setArticles] = useState([]);
+  const [approvedArticles, setApprovedArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const roleLabel =
-    user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1);
+    user?.role?.charAt(0).toUpperCase() +
+    user?.role?.slice(1);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        // ==========================================
+        // WRITER DATA
+        // ==========================================
+
+        if (user?.role === "writer") {
+          const response = await api.get("/articles/my");
+
+          setArticles(response.data.articles || []);
+        }
+
+        // ==========================================
+        // EDITOR DATA
+        // ==========================================
+
+        if (user?.role === "editor") {
+          // Submitted articles waiting for review
+          const reviewResponse = await api.get(
+            "/articles/review"
+          );
+
+          setArticles(reviewResponse.data.articles || []);
+
+          // Approved articles waiting to be published
+          const approvedResponse = await api.get(
+            "/articles/approved"
+          );
+
+          setApprovedArticles(
+            approvedResponse.data.articles || []
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Dashboard data error:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.role) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  // ==========================================
+  // WRITER STATISTICS
+  // ==========================================
+
+  const draftCount = articles.filter(
+    (article) => article.status === "DRAFT"
+  ).length;
+
+  const submittedCount = articles.filter(
+    (article) => article.status === "SUBMITTED"
+  ).length;
+
+  const changesRequestedCount = articles.filter(
+    (article) => article.status === "CHANGES_REQUESTED"
+  ).length;
+
+  const publishedCount = articles.filter(
+    (article) => article.status === "PUBLISHED"
+  ).length;
+
+  // ==========================================
+  // EDITOR STATISTICS
+  // ==========================================
+
+  const awaitingReviewCount = articles.filter(
+    (article) => article.status === "SUBMITTED"
+  ).length;
+
+  const approvedCount = approvedArticles.filter(
+    (article) => article.status === "APPROVED"
+  ).length;
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Editorial Workflow
-            </h1>
 
-            <p className="text-sm text-gray-500">
-              Dashboard
-            </p>
-          </div>
+      {/* ======================================
+          HEADER
+      ====================================== */}
 
-          <button
-            onClick={logout}
-            className="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
-          >
-            Log out
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
-      {/* Main */}
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      {/* ======================================
+          MAIN
+      ====================================== */}
+
+      <main className="mx-auto max-w-7xl px-6 py-10">
+
         {/* Welcome */}
+
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
+
+          <h2 className="text-3xl font-bold text-gray-900">
             Welcome, {user?.name}
           </h2>
 
-          <p className="mt-1 text-gray-500">
-            You are logged in as a{" "}
-            <span className="font-medium text-gray-700">
-              {roleLabel}
-            </span>
-            .
+          <p className="mt-2 text-gray-500">
+            Manage your editorial workflow from here.
           </p>
+
         </div>
 
-        {/* Writer Dashboard */}
+
+        {/* ======================================
+            WRITER DASHBOARD
+        ====================================== */}
+
         {user?.role === "writer" && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Create Article */}
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Write an Article
-              </h3>
+          <>
+            {/* Statistics */}
 
-              <p className="mt-2 text-sm text-gray-500">
-                Create a new article and submit it to the editorial
-                team for review.
-              </p>
+            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-              <button
-                onClick={() => navigate("/articles/new")}
-                className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
-              >
-                Create Article
-              </button>
+              {/* Draft */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-sm text-gray-500">
+                  Drafts
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : draftCount}
+                </p>
+              </div>
+
+
+              {/* Submitted */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-sm text-gray-500">
+                  Submitted
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : submittedCount}
+                </p>
+              </div>
+
+
+              {/* Changes Requested */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-sm text-gray-500">
+                  Changes Requested
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : changesRequestedCount}
+                </p>
+              </div>
+
+
+              {/* Published */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-sm text-gray-500">
+                  Published
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : publishedCount}
+                </p>
+              </div>
+
             </div>
 
-            {/* My Articles */}
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900">
-                My Articles
-              </h3>
 
-              <p className="mt-2 text-sm text-gray-500">
-                View your drafts, submitted articles, and articles
-                returned for changes.
-              </p>
+            {/* Quick Actions */}
 
-              <button
-                onClick={() => navigate("/articles/my")}
-                className="mt-6 rounded-md border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                View My Articles
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Editor Dashboard */}
-        {user?.role === "editor" && (
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Editorial Review
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Quick Actions
             </h3>
 
-            <p className="mt-2 max-w-2xl text-sm text-gray-500">
-              Review articles submitted by writers, request changes,
-              or approve articles for publication.
-            </p>
+            <div className="grid gap-6 md:grid-cols-3">
 
-            <button
-              onClick={() => navigate("/editor/review")}
-              className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              Review Articles
-            </button>
-          </div>
+              {/* Create */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Write an Article
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  Create a new article and save it as a draft.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/articles/new")
+                  }
+                  className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+                >
+                  Create Article
+                </button>
+
+              </div>
+
+
+              {/* My Articles */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  My Articles
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  View and manage all your articles.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/articles/my")
+                  }
+                  className="mt-6 rounded-md border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  View My Articles
+                </button>
+
+              </div>
+
+
+              {/* Published */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Published Articles
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  Read articles that have been published.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/published")
+                  }
+                  className="mt-6 rounded-md border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  View Published
+                </button>
+
+              </div>
+
+            </div>
+          </>
         )}
 
-        {/* Unknown role */}
+
+        {/* ======================================
+            EDITOR DASHBOARD
+        ====================================== */}
+
+        {user?.role === "editor" && (
+          <>
+            {/* Editor Statistics */}
+
+            <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+              {/* Awaiting Review */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+
+                <p className="text-sm text-gray-500">
+                  Awaiting Review
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : awaitingReviewCount}
+                </p>
+
+              </div>
+
+
+              {/* Approved */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+
+                <p className="text-sm text-gray-500">
+                  Approved to Publish
+                </p>
+
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {loading ? "..." : approvedCount}
+                </p>
+
+              </div>
+
+
+              {/* Published */}
+
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+
+                <p className="text-sm text-gray-500">
+                  Published Content
+                </p>
+
+                <p className="mt-2 text-sm text-gray-600">
+                  View articles that have already been published.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Editor Actions */}
+
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Editorial Actions
+            </h3>
+
+            <div className="grid gap-6 md:grid-cols-3">
+
+              {/* Review Articles */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Review Articles
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  Review articles submitted by writers, request
+                  changes, or approve articles.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/editor/review")
+                  }
+                  className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+                >
+                  Review Articles
+                </button>
+
+              </div>
+
+
+              {/* Approved Articles */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Approved Articles
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  View approved articles and publish them when
+                  they are ready.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/editor/approved")
+                  }
+                  className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+                >
+                  Publish Articles
+                </button>
+
+              </div>
+
+
+              {/* Published Articles */}
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Published Articles
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  View articles that have already been published.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate("/published")
+                  }
+                  className="mt-6 rounded-md border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  View Published
+                </button>
+
+              </div>
+
+            </div>
+          </>
+        )}
+
+
+        {/* ======================================
+            UNKNOWN ROLE
+        ====================================== */}
+
         {!["writer", "editor"].includes(user?.role) && (
           <div className="rounded-xl border bg-white p-6 shadow-sm">
+
             <h3 className="font-semibold text-gray-900">
               No dashboard available
             </h3>
@@ -123,11 +435,14 @@ const Dashboard = () => {
             <p className="mt-2 text-sm text-gray-500">
               Your account role does not have a dashboard configured yet.
             </p>
+
           </div>
         )}
+
       </main>
     </div>
   );
 };
 
 export default Dashboard;
+
