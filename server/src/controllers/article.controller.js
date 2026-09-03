@@ -182,12 +182,21 @@ const updateArticle = async (req, res) => {
     // ======================================
     // CHECK OWNERSHIP
     // ======================================
-    if (article.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only edit your own articles",
-      });
-    }
+   const userId = req.user._id?.toString() || req.user.id?.toString();
+
+if (!userId) {
+  return res.status(401).json({
+    success: false,
+    message: "User authentication information is missing",
+  });
+}
+
+if (article.author.toString() !== userId) {
+  return res.status(403).json({
+    success: false,
+    message: "You can only edit your own articles",
+  });
+}
 
     // ======================================
     // CHECK STATUS
@@ -310,12 +319,21 @@ const submitArticle = async (req, res) => {
     // ======================================
     // CHECK OWNERSHIP
     // ======================================
-    if (article.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only submit your own articles",
-      });
-    }
+  const userId = req.user._id?.toString() || req.user.id?.toString();
+
+   if (!userId) {
+     return res.status(401).json({
+     success: false,
+     message: "User authentication information is missing",
+    });
+   }
+
+  if (article.author.toString() !== userId) {
+     return res.status(403).json({
+      success: false,
+     message: "You can only submit your own articles",
+    });
+   }
 
     // ======================================
     // CHECK STATUS
@@ -416,14 +434,227 @@ const getReviewArticles = async (req, res) => {
 };
 
 
+// ==========================================
+// REQUEST CHANGES
+// POST /api/articles/:id/request-changes
+// Editor only
+// ==========================================
+const requestChanges = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { feedback } = req.body;
+
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    if (article.status !== "SUBMITTED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Only submitted articles can have changes requested",
+      });
+    }
+
+    if (!feedback || !feedback.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Feedback is required",
+      });
+    }
+
+    article.status = "CHANGES_REQUESTED";
+
+    // We'll use this field for now.
+    article.editorFeedback = feedback.trim();
+
+    await article.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Changes requested successfully",
+      article,
+    });
+  } catch (error) {
+    console.error("Request changes error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while requesting changes",
+    });
+  }
+};
+
+
+// ==========================================
+// APPROVE ARTICLE
+// POST /api/articles/:id/approve
+// Editor only
+// ==========================================
+const approveArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    if (article.status !== "SUBMITTED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Only submitted articles can be approved",
+      });
+    }
+
+    article.status = "APPROVED";
+    article.approvedAt = new Date();
+    article.approvedBy = req.user._id;
+
+    await article.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Article approved successfully",
+      article,
+    });
+  } catch (error) {
+    console.error("Approve article error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while approving article",
+    });
+  }
+};
+
+
+// ==========================================
+// PUBLISH ARTICLE
+// POST /api/articles/:id/publish
+// Editor only
+// ==========================================
+const publishArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // ======================================
+    // CHECK STATUS
+    // ======================================
+
+    if (article.status !== "APPROVED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Only approved articles can be published",
+      });
+    }
+
+    // ======================================
+    // PUBLISH
+    // ======================================
+
+    article.status = "PUBLISHED";
+    article.publishedAt = new Date();
+    article.publishedBy = req.user._id;
+
+    await article.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Article published successfully",
+      article,
+    });
+  } catch (error) {
+    console.error("Publish article error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while publishing article",
+    });
+  }
+};
+
+// ==========================================
+// GET PUBLISHED ARTICLES
+// GET /api/articles/published
+// Authenticated users
+// ==========================================
+const getPublishedArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({
+      status: "PUBLISHED",
+    })
+      .populate("author", "name email")
+      .populate("publishedBy", "name email")
+      .sort({ publishedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: articles.length,
+      articles,
+    });
+  } catch (error) {
+    console.error(
+      "Get published articles error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Something went wrong while fetching published articles",
+    });
+  }
+};
+
+
 
 module.exports = {
   createArticle,
+  getPublishedArticles,
+
   getMyArticles,
   getArticle,
   updateArticle,
   submitArticle,
-  getReviewArticles
+  getReviewArticles,
+  requestChanges,
+  approveArticle,
+  publishArticle
 };
+  
+  
+  
+  
+  
   
   

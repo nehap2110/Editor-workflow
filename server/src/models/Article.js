@@ -21,6 +21,11 @@ const articleSchema = new mongoose.Schema(
     submittedAt: { type: Date, default: null },
     reviewedAt: { type: Date, default: null },
     publishedAt: { type: Date, default: null },
+    publishedBy :{ type : mongoose.Schema.Types.ObjectId, ref :"User",default : null},
+    approvedAt: { type: Date, default: null },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    editorFeedback: {type: String, default: null},
+
   },
   { timestamps: true }
 );

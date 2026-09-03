@@ -7,6 +7,8 @@ import EditorReview from "./pages/EditorReview";
 import ArticleEditor from "./pages/ArticleEditor";
 import MyArticles from "./pages/MyArticles";
 import ArticleDetail from "./pages/ArticleDetail";
+import EditorReviewArticle from "./pages/EditorReviewArticle";
+import PublishedArticles from "./pages/PublishedArticles";
 
 function App() {
   return (
@@ -63,6 +65,22 @@ function App() {
        </ProtectedRoute>
        }
       />
+
+      <Route path="/editor/review/:id"
+       element={
+       <ProtectedRoute>
+        <EditorReviewArticle />
+       </ProtectedRoute>
+       }
+      />
+
+       <Route path="/published"
+        element={
+        <ProtectedRoute>
+         <PublishedArticles />
+        </ProtectedRoute>
+       }
+       />
 
     </Routes>
   );

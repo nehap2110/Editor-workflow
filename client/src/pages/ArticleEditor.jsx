@@ -6,7 +6,7 @@ import api from "../services/api";
 const ArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  //const { user } = useAuth();
 
   const isEditing = Boolean(id);
 
@@ -39,14 +39,6 @@ const ArticleEditor = () => {
 
         const article = response.data.article;
 
-        // Make sure writer owns this article
-        if (
-          article.author?._id &&
-          article.author._id.toString() !== user?._id?.toString()
-        ) {
-          setError("You do not have permission to edit this article.");
-          return;
-        }
 
         // Only these statuses can be edited
         if (
@@ -80,7 +72,7 @@ const ArticleEditor = () => {
     };
 
     fetchArticle();
-  }, [id, isEditing, user]);
+  }, [id, isEditing]);
 
   // ==========================================
   // HANDLE INPUT
@@ -119,55 +111,76 @@ const ArticleEditor = () => {
   // ==========================================
   // SAVE ARTICLE
   // ==========================================
-  const handleSave = async () => {
-    const validationError = validateForm();
+ 
+const handleSave = async () => {
+  const validationError = validateForm();
 
-    if (validationError) {
-      setError(validationError);
-      return;
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    let response;
+
+    if (isEditing) {
+      // Existing article → update it
+      response = await api.patch(
+        `/articles/${id}`,
+        formData
+      );
+    } else {
+      // New article → create it ONCE
+      response = await api.post(
+        "/articles",
+        formData
+      );
     }
 
-    try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
+    const article = response.data.article;
 
-      let response;
-
-      if (isEditing) {
-        response = await api.patch(`/articles/${id}`, formData);
-      } else {
-        response = await api.post("/articles", formData);
-      }
-
-      const article = response.data.article;
-
-      setSuccess(
-        isEditing
-          ? "Article updated successfully."
-          : "Article saved as draft successfully."
+    if (!article || !article._id) {
+      throw new Error(
+        "Article was saved but no article ID was returned."
       );
+    }
 
-      // If creating a new article,
-      // update URL to edit mode.
-      if (!isEditing) {
-        navigate(`/articles/${article._id}/edit`, {
+    setStatus(article.status);
+
+    setSuccess(
+      isEditing
+        ? "Article updated successfully."
+        : "Article saved as draft successfully."
+    );
+
+    // IMPORTANT:
+    // After creating the article, move to the edit URL
+    // containing the real MongoDB article ID.
+    if (!isEditing) {
+      navigate(
+        `/articles/${article._id}/edit`,
+        {
           replace: true,
-        });
-      }
-
-      setStatus(article.status);
-    } catch (err) {
-      console.error("Save article error:", err);
-
-      setError(
-        err.response?.data?.message ||
-          "Failed to save article."
+        }
       );
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error("Save article error:", err);
+
+    setError(
+      err.response?.data?.message ||
+        err.message ||
+        "Failed to save article."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ==========================================
   // SUBMIT ARTICLE

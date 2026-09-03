@@ -7,6 +7,13 @@ const {
   updateArticle,
   submitArticle,
   getReviewArticles,
+  requestChanges,
+  approveArticle,
+  getPublishedArticles,
+} = require("../controllers/article.controller");
+
+const {
+  publishArticle,
 } = require("../controllers/article.controller");
 
 const protect = require("../middleware/auth.middleware");
@@ -42,6 +49,36 @@ router.get(
   protect,
   requireRole("editor"),
   getReviewArticles
+);
+
+
+router.get(
+  "/published",
+  protect,
+  getPublishedArticles
+);
+
+// Request changes
+router.post(
+  "/:id/request-changes",
+  protect,
+  requireRole("editor"),
+  requestChanges
+);
+
+// Approve
+router.post(
+  "/:id/approve",
+  protect,
+  requireRole("editor"),
+  approveArticle
+);
+
+router.post(
+  "/:id/publish",
+  protect,
+  requireRole("editor"),
+  publishArticle
 );
 
 // Get single article — Any authenticated user
