@@ -28,11 +28,11 @@ const articleSchema = new mongoose.Schema(
       maxlength: 500,
     },
 
-    section: {
-      type: String,
-      trim: true,
-      required: true,
-    },
+   section: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Section",
+  required: [true, "Article section is required"],
+},
 
     author: {
       type: mongoose.Schema.Types.ObjectId,
@@ -100,6 +100,22 @@ const articleSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+    },
+
+    overdueAlertDismissed: {
+    type: Boolean,
+    default: false,
+    },
+
+    overdueAlertDismissedAt: {
+    type: Date,
+    default: null,
+     },
+
+   overdueAlertDismissedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
     },
 
     editorFeedback: {

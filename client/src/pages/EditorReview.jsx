@@ -135,7 +135,9 @@ const EditorReview = () => {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      {article.section}
+                      {typeof article.section === "object"
+                      ? article.section?.name
+                     : article.section || "-"}
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-500">

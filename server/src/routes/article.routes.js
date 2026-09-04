@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createArticle,
   getMyArticles,
+  getArticles,
   getArticle,
   updateArticle,
   submitArticle,
@@ -12,6 +13,22 @@ const {
   approveArticle,
   scheduleArticle,
   getPublishedArticles,
+  unpublishArticle,
+  createRevision,
+  updateRevision,
+  submitRevision,
+  approveRevision,
+  scheduleRevision,
+  publishRevision,
+  getOverdueAlerts,
+  dismissOverdueAlert,
+  getOverdueAlertCount,
+  bulkScheduleArticles,
+  bulkUnpublishArticles,
+  exportEditorialCalendar,
+  getArticleHistory,
+  addArticleComment,
+  getScheduledArticles
 } = require("../controllers/article.controller");
 
 const {
@@ -27,8 +44,21 @@ const router = express.Router();
 router.post(
   "/",
   protect,
-  requireRole("writer"),
+  requireRole("writer","editor"),
   createArticle
+);
+
+// ==========================================
+// FIND ARTICLES
+// GET /api/articles
+// Editor → all visible articles
+// Writer → own articles
+// ==========================================
+
+router.get(
+  "/",
+  protect,
+  getArticles
 );
 
 // Get current writer's articles — Writer only
@@ -66,18 +96,133 @@ router.get(
   getApprovedArticles
 );
 
+router.get(
+  "/published",
+  protect,
+    requireRole("editor", "writer"),
+  getPublishedArticles
+);
+
+router.get(
+  "/scheduled",
+  protect,
+  requireRole("editor"),
+  getScheduledArticles
+);
+
+// ==========================================
+// BULK ACTIONS
+// ==========================================
+
+// Bulk schedule
+router.post(
+  "/bulk/schedule",
+  protect,
+  requireRole("editor"),
+  bulkScheduleArticles
+);
+
+// Bulk unpublish
+router.patch(
+  "/bulk/unpublish",
+  protect,
+  requireRole("editor"),
+  bulkUnpublishArticles
+);
+
+// Editorial calendar CSV
+router.get(
+  "/calendar/export",
+  protect,
+  requireRole("editor"),
+  exportEditorialCalendar
+);
+
+
+
+
+//update revision
+router.patch(
+  "/revisions/:revisionId",
+  protect,
+  requireRole("writer"),
+  updateRevision
+);
+
+// Submit revision
+router.patch(
+  "/revisions/:revisionId/submit",
+  protect,
+  requireRole("writer"),
+  submitRevision
+);
+
+// Approve revision
+router.patch(
+  "/revisions/:revisionId/approve",
+  protect,
+  requireRole("editor"),
+  approveRevision
+);
+
+// Schedule revision
+router.patch(
+  "/revisions/:revisionId/schedule",
+  protect,
+  requireRole("editor"),
+  scheduleRevision
+);
+
+// Publish revision
+router.patch(
+  "/revisions/:revisionId/publish",
+  protect,
+  requireRole("editor"),
+  publishRevision
+);
+
+// Overdue alerts
+router.get(
+  "/alerts/overdue",
+  protect,
+  requireRole("editor"),
+  getOverdueAlerts
+);
+
+router.get(
+  "/alerts/overdue/count",
+  protect,
+  requireRole("editor"),
+  getOverdueAlertCount
+);
+
+// Dismiss overdue alert
+router.patch(
+  "/alerts/overdue/:id/dismiss",
+  protect,
+  requireRole("editor"),
+  dismissOverdueAlert
+);
+
+router.post(
+  "/:id/comments",
+  protect,
+  requireRole("editor", "writer"),
+  addArticleComment
+);
+
+router.get(
+  "/:id/history",
+  protect,
+  getArticleHistory
+);
+
+//schedule article
 router.post(
   "/:id/schedule",
   protect,
   requireRole("editor"),
   scheduleArticle
-);
-
-
-router.get(
-  "/published",
-  protect,
-  getPublishedArticles
 );
 
 // Request changes
@@ -114,7 +259,7 @@ router.get(
 router.patch(
   "/:id",
   protect,
-  requireRole("writer"),
+  requireRole("editor", "writer"),
   updateArticle
 );
 
@@ -130,6 +275,21 @@ router.post(
   submitArticle
 );
 
+// Editor unpublishes scheduled/published article
+router.patch(
+  "/:id/unpublish",
+  protect,
+  requireRole("editor"),
+  unpublishArticle
+);
+
+// Create a new revision for an existing article
+router.post(
+  "/:id/revision",
+  protect,
+  requireRole("writer"),
+  createRevision
+);
 
 
 

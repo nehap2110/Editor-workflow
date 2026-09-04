@@ -188,7 +188,7 @@ const MyArticles = () => {
 
                       {/* Section */}
                       <td className="px-6 py-4 text-sm text-gray-700">
-                        {article.section || "-"}
+                       {article.section?.name || "-"}
                       </td>
 
                       {/* Status */}

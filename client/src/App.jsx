@@ -11,6 +11,10 @@ import EditorReviewArticle from "./pages/EditorReviewArticle";
 import PublishedArticles from "./pages/PublishedArticles";
 import RoleRoute from "./routes/RoleRoute.jsx";
 import ApprovedArticles from "./pages/ApprovedArticles";
+import OverdueAlerts from "./pages/OverdueAlerts";
+import SectionManagement from "./pages/SectionManagement";
+import SectionDetail from "./pages/SectionDetail";
+import ScheduledArticles from "./pages/ScheduledArticles.jsx";
 
 function App() {
   return (
@@ -38,10 +42,20 @@ function App() {
          }
         />
 
+        <Route path="/editor/alerts"
+         element={
+         <ProtectedRoute>
+          <RoleRoute allowedRoles={["editor"]}>
+           <OverdueAlerts />
+          </RoleRoute>
+         </ProtectedRoute>
+          }
+        />
+
      <Route path="/articles/new"
           element={
             <ProtectedRoute>
-             <RoleRoute allowedRoles={["writer"]}>
+             <RoleRoute allowedRoles={["writer","editor"]}>
              <ArticleEditor />
              </RoleRoute>
             </ProtectedRoute>
@@ -51,7 +65,7 @@ function App() {
      <Route path="/articles/:id/edit"
            element={
             <ProtectedRoute>
-             <RoleRoute allowedRoles={["writer"]}>
+             <RoleRoute allowedRoles={["writer","editor"]}>
               <ArticleEditor />
              </RoleRoute>
             </ProtectedRoute>
@@ -101,6 +115,36 @@ function App() {
         </ProtectedRoute>
        }
        />
+
+       <Route path="/editor/sections"
+        element={
+         <ProtectedRoute>
+          <RoleRoute allowedRoles={["editor"]}>
+           <SectionManagement />
+          </RoleRoute>
+          </ProtectedRoute>
+        }
+     />
+
+     <Route
+       path="/editor/sections/:id"
+        element={
+         <ProtectedRoute>
+         <RoleRoute allowedRoles={["editor"]}>
+         <SectionDetail />
+         </RoleRoute>
+         </ProtectedRoute>
+        }
+       />
+
+       <Route
+  path="/editor/scheduled"
+  element={
+    <RoleRoute allowedRoles={["editor"]}>
+      <ScheduledArticles />
+    </RoleRoute>
+  }
+/>
 
     </Routes>
   );

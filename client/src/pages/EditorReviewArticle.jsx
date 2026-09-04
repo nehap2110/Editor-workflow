@@ -85,13 +85,7 @@ const EditorReviewArticle = () => {
   // APPROVE ARTICLE
   // ==========================================
   const handleApprove = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to approve this article?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
+    
 
     try {
       setActionLoading(true);
@@ -208,7 +202,7 @@ const EditorReviewArticle = () => {
         <article className="rounded-xl border bg-white p-8 shadow-sm">
           {/* Section */}
           <div className="mb-3 text-sm font-medium text-gray-500">
-            {article.section}
+           {article.section?.name || "-"}
           </div>
 
           {/* Title */}
