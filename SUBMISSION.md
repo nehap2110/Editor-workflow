@@ -2,8 +2,8 @@
 
 ## Links
 
-* **GitHub repository:** `<public repo URL>`
-* **Live application:** `<deployed URL>`
+* **GitHub repository:** `https://github.com/nehap2110/Editor-workflow`
+* **Live application:** `https://editor-workflow.vercel.app`
 
 ## Notes for the reviewer
 
