@@ -15,8 +15,8 @@ Please use the demo credentials below to test the Writer and Editor workflows.
 
 | Role   | Email            | Password            |
 | ------ | ---------------- | ------------------- |
-| Editor | `<editor-email>` | `<editor-password>` |
-| Writer | `<writer-email>` | `<writer-password>` |
+| Editor | editor@example.com | Editor@123 |
+| Writer | writer@example.com | Writer@123 |
 
 ## Stack
 

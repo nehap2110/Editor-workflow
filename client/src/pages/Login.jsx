@@ -72,9 +72,7 @@ const Login = () => {
           </Link>
         </p>
 
-        <p className="text-xs text-gray-400 mt-6">
-          Demo: editor@example.com / Editor@123 · writer@example.com / Writer@123
-        </p>
+       
       </div>
     </div>
   );
