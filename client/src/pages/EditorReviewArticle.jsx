@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
@@ -15,9 +16,9 @@ const EditorReviewArticle = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ==========================================
+  
   // FETCH ARTICLE
-  // ==========================================
+  
   const fetchArticle = async () => {
     try {
       setLoading(true);
@@ -42,9 +43,9 @@ const EditorReviewArticle = () => {
     fetchArticle();
   }, [id]);
 
-  // ==========================================
+  
   // REQUEST CHANGES
-  // ==========================================
+  
   const handleRequestChanges = async () => {
     if (!feedback.trim()) {
       setError("Please provide feedback before requesting changes.");
@@ -66,9 +67,7 @@ const EditorReviewArticle = () => {
       setArticle(response.data.article);
       setFeedback("");
 
-      setSuccess(
-        "Changes requested successfully."
-      );
+      setSuccess("Changes requested successfully.");
     } catch (err) {
       console.error("Request changes error:", err);
 
@@ -81,11 +80,17 @@ const EditorReviewArticle = () => {
     }
   };
 
-  // ==========================================
+  
   // APPROVE ARTICLE
-  // ==========================================
+  
   const handleApprove = async () => {
-    
+    const confirmed = window.confirm(
+      "Are you sure you want to approve this article?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
 
     try {
       setActionLoading(true);
@@ -98,9 +103,7 @@ const EditorReviewArticle = () => {
 
       setArticle(response.data.article);
 
-      setSuccess(
-        "Article approved successfully."
-      );
+      setSuccess("Article approved successfully.");
     } catch (err) {
       console.error("Approve article error:", err);
 
@@ -113,37 +116,47 @@ const EditorReviewArticle = () => {
     }
   };
 
-  // ==========================================
+  
   // LOADING
-  // ==========================================
+  
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading article...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink">
+        <div className="h-[3px] bg-press" />
+
+        <div className="flex min-h-[calc(100vh-3px)] items-center justify-center">
+          <div className="text-center">
+            <p className="font-serif text-2xl text-ink">
+              Loading article
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              Preparing the editorial review...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // ==========================================
   // ERROR / NO ARTICLE
-  // ==========================================
+  
   if (error && !article) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="min-h-screen bg-paper font-sans text-ink">
+        <div className="h-[3px] bg-press" />
+
+        <main className="mx-auto max-w-5xl px-6 py-12">
+          <div className="border border-red-200 bg-red-50 p-5 text-sm text-red-700">
             {error}
           </div>
 
           <button
             onClick={() => navigate("/editor/review")}
-            className="mt-4 rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700"
+            className="mt-5 border border-hairline bg-white px-5 py-2.5 text-sm font-medium text-ink transition hover:border-press hover:text-press"
           >
-            Back to Review Queue
+            ← Back to Review Queue
           </button>
-        </div>
+        </main>
       </div>
     );
   }
@@ -152,139 +165,160 @@ const EditorReviewArticle = () => {
     return null;
   }
 
+  const sectionName =
+    typeof article.section === "object"
+      ? article.section?.name
+      : article.section;
+
+  const authorName =
+    article.author?.name ||
+    article.author?.email ||
+    "Unknown";
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* ====================================== */}
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      {/* Top editorial rule */}
+      <div className="h-[3px] bg-press" />
+
+      
       {/* HEADER */}
-      {/* ====================================== */}
+      
 
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+      <header className="border-b border-hairline bg-paper">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Review Article
-            </h1>
-
-            <p className="text-sm text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-press">
               Editorial Workflow
             </p>
+
+            <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-ink">
+              Review Article
+            </h1>
           </div>
 
-          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+          <span className="border border-hairline bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
             {article.status}
           </span>
         </div>
       </header>
 
-      {/* ====================================== */}
+      
       {/* MAIN */}
-      {/* ====================================== */}
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
-        {/* Error */}
+
+      <main className="mx-auto max-w-5xl px-6 py-10">
+        {/* Alerts */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-6 border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {/* Success */}
         {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+          <div className="mb-6 border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
             {success}
           </div>
         )}
 
-        {/* ==================================== */}
+    
         {/* ARTICLE */}
-        {/* ==================================== */}
+        
 
-        <article className="rounded-xl border bg-white p-8 shadow-sm">
-          {/* Section */}
-          <div className="mb-3 text-sm font-medium text-gray-500">
-           {article.section?.name || "-"}
-          </div>
+        <article className="border-y border-hairline bg-paper">
+          {/* Article header */}
+          <div className="border-b border-hairline py-8">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-press">
+              {sectionName || "Unknown Section"}
+            </p>
 
-          {/* Title */}
-          <h2 className="text-3xl font-bold leading-tight text-gray-900">
-            {article.title}
-          </h2>
+            <h2 className="max-w-4xl font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-ink md:text-5xl">
+              {article.title}
+            </h2>
 
-          {/* Author / dates */}
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
-            <span>
-              Author:{" "}
-              <span className="font-medium text-gray-700">
-                {article.author?.name ||
-                  article.author?.email ||
-                  "Unknown"}
-              </span>
-            </span>
-
-            {article.createdAt && (
+            {/* Author / dates */}
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
               <span>
-                Created:{" "}
-                {new Date(
-                  article.createdAt
-                ).toLocaleDateString()}
+                By{" "}
+                <span className="font-medium text-ink">
+                  {authorName}
+                </span>
               </span>
-            )}
 
-            {article.submittedAt && (
-              <span>
-                Submitted:{" "}
-                {new Date(
-                  article.submittedAt
-                ).toLocaleDateString()}
-              </span>
-            )}
+              {article.createdAt && (
+                <span>
+                  Created{" "}
+                  {new Date(
+                    article.createdAt
+                  ).toLocaleDateString()}
+                </span>
+              )}
+
+              {article.submittedAt && (
+                <span>
+                  Submitted{" "}
+                  {new Date(
+                    article.submittedAt
+                  ).toLocaleDateString()}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Summary */}
           {article.summary && (
-            <div className="mt-8 rounded-lg bg-gray-50 p-5">
-              <h3 className="mb-2 text-sm font-semibold text-gray-700">
-                Summary
-              </h3>
+            <div className="border-b border-hairline py-7">
+              <div className="border-l-[3px] border-press pl-5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                  Summary
+                </p>
 
-              <p className="text-sm leading-6 text-gray-600">
-                {article.summary}
-              </p>
+                <p className="max-w-3xl font-serif text-lg leading-8 text-ink">
+                  {article.summary}
+                </p>
+              </div>
             </div>
           )}
 
           {/* Content */}
-          <div className="mt-8">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <div className="py-9">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
               Article Content
-            </h3>
+            </p>
 
-            <div className="whitespace-pre-wrap text-base leading-8 text-gray-800">
+            <div className="max-w-4xl whitespace-pre-wrap font-serif text-lg leading-9 text-ink">
               {article.content}
             </div>
           </div>
         </article>
 
-        {/* ==================================== */}
+        
         {/* EDITOR ACTIONS */}
-        {/* ==================================== */}
+      
 
         {article.status === "SUBMITTED" && (
-          <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Editorial Decision
-            </h2>
+          <section className="mt-10 border-t-2 border-ink pt-7">
+            <div className="flex flex-col justify-between gap-3 border-b border-hairline pb-5 md:flex-row md:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-press">
+                  Editorial Decision
+                </p>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Choose whether the article needs changes or is ready
-              for approval.
-            </p>
+                <h2 className="mt-1 font-serif text-2xl font-semibold text-ink">
+                  Review & Decision
+                </h2>
+              </div>
+
+              <p className="max-w-md text-sm leading-6 text-muted md:text-right">
+                Review the submitted article and either request
+                revisions or approve it for the next stage.
+              </p>
+            </div>
 
             {/* Feedback */}
-            <div className="mt-6">
+            <div className="mt-7">
               <label
                 htmlFor="feedback"
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-semibold text-ink"
               >
                 Feedback for Writer
               </label>
@@ -295,19 +329,19 @@ const EditorReviewArticle = () => {
                 onChange={(event) =>
                   setFeedback(event.target.value)
                 }
-                rows={5}
+                rows={6}
                 placeholder="Explain what the writer should change..."
-                className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+                className="w-full resize-y border border-hairline bg-white px-4 py-3 font-sans text-sm leading-6 text-ink outline-none transition placeholder:text-muted focus:border-press focus:ring-1 focus:ring-press"
               />
             </div>
 
             {/* Buttons */}
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <div className="mt-5 flex flex-col gap-3 border-t border-hairline pt-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={handleRequestChanges}
                 disabled={actionLoading}
-                className="rounded-lg border border-orange-300 px-5 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border border-press px-6 py-3 text-sm font-semibold text-press transition hover:bg-press hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {actionLoading
                   ? "Processing..."
@@ -318,7 +352,7 @@ const EditorReviewArticle = () => {
                 type="button"
                 onClick={handleApprove}
                 disabled={actionLoading}
-                className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-press disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {actionLoading
                   ? "Processing..."
@@ -328,27 +362,30 @@ const EditorReviewArticle = () => {
           </section>
         )}
 
-        {/* ==================================== */}
+        
         {/* EXISTING FEEDBACK */}
-        {/* ==================================== */}
+        
 
         {article.editorFeedback && (
-          <section className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <h2 className="text-sm font-semibold text-orange-900">
+          <section className="mt-10 border-l-[3px] border-press bg-white px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
               Editor Feedback
-            </h2>
+            </p>
 
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-orange-800">
+            <p className="mt-3 whitespace-pre-wrap font-serif text-base leading-7 text-ink">
               {article.editorFeedback}
             </p>
           </section>
         )}
 
-        {/* Back */}
-        <div className="mt-6">
+        
+        {/* BACK */}
+        
+
+        <div className="mt-10 border-t border-hairline pt-6">
           <button
             onClick={() => navigate("/editor/review")}
-            className="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="text-sm font-semibold text-muted transition hover:text-press"
           >
             ← Back to Review Queue
           </button>
@@ -359,3 +396,4 @@ const EditorReviewArticle = () => {
 };
 
 export default EditorReviewArticle;
+

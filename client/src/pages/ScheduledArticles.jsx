@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api.js";
@@ -64,7 +65,6 @@ const ScheduledArticles = () => {
           "Article published successfully."
       );
 
-      // Remove from scheduled list
       setArticles((prev) =>
         prev.filter((article) => article._id !== id)
       );
@@ -105,7 +105,6 @@ const ScheduledArticles = () => {
           "Article unpublished successfully."
       );
 
-      // Remove because status becomes APPROVED
       setArticles((prev) =>
         prev.filter((article) => article._id !== id)
       );
@@ -130,169 +129,217 @@ const ScheduledArticles = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
         <Navbar />
 
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <p className="text-gray-600">
-            Loading scheduled articles...
-          </p>
+        <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-serif text-2xl">
+              Loading scheduled articles
+            </p>
+
+            <div className="mx-auto mt-4 h-px w-16 bg-press" />
+
+            <p className="mt-3 text-sm text-muted">
+              Checking the publication schedule...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <div className="h-[3px] bg-press" />
+
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-6 py-10">
-
-        <div className="mb-6">
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        {/* Back */}
+        <div className="mb-8">
           <BackButton label="Back to Dashboard" />
         </div>
 
         {/* Header */}
+        <header className="border-b border-hairline pb-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-press">
+                Publishing Desk
+              </p>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Scheduled Articles
-          </h1>
+              <h1 className="mt-2 font-serif text-4xl font-semibold tracking-tight md:text-5xl">
+                Scheduled Articles
+              </h1>
 
-          <p className="mt-2 text-gray-500">
-            Articles scheduled for future publication.
-          </p>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+                Articles scheduled for future publication.
+                Review the queue and publish or return articles
+                when needed.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-press pl-4">
+              <p className="text-2xl font-semibold">
+                {articles.length}
+              </p>
+
+              <p className="text-xs uppercase tracking-wider text-muted">
+                Scheduled
+              </p>
+            </div>
+          </div>
+        </header>
+
+        {/* Alerts */}
+        <div className="mt-6 space-y-3">
+          {error && (
+            <div className="border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+              <span className="font-semibold">Error:</span>{" "}
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
+              <span className="font-semibold">Success:</span>{" "}
+              {success}
+            </div>
+          )}
         </div>
 
-        {/* Error */}
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Success */}
-
-        {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
         {/* Empty */}
-
         {articles.length === 0 ? (
-          <div className="rounded-xl border bg-white p-10 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-800">
+          <section className="mt-8 border border-hairline bg-white px-6 py-16 text-center md:px-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
+              Publication Queue
+            </p>
+
+            <h2 className="mt-3 font-serif text-3xl font-semibold">
               No scheduled articles
             </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted">
               Articles scheduled for publication will appear
               here.
             </p>
 
             <button
               onClick={() => navigate("/editor/approved")}
-              className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+              className="mt-7 bg-press px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
             >
               Back to Approved Articles
             </button>
-          </div>
+          </section>
         ) : (
-          <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+          <section className="mt-8 overflow-hidden border border-hairline bg-white">
+            {/* Table heading */}
+            <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
+              <div>
+                <p className="font-serif text-xl font-semibold">
+                  Publication Queue
+                </p>
+
+                <p className="mt-1 text-xs text-muted">
+                  Upcoming articles awaiting publication.
+                </p>
+              </div>
+
+              <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted sm:block">
+                {articles.length} item
+                {articles.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
             <div className="overflow-x-auto">
-
-              <table className="min-w-full divide-y divide-gray-200">
-
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-hairline bg-paper">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Article
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Author
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Section
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Scheduled For
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Status
                     </th>
 
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                       Action
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-200 bg-white">
-
+                <tbody>
                   {articles.map((article) => (
-                    <tr key={article._id}>
-
+                    <tr
+                      key={article._id}
+                      className="border-b border-hairline last:border-b-0 hover:bg-paper/60"
+                    >
                       {/* Article */}
+                      <td className="px-6 py-5 align-top">
+                        <div className="max-w-sm">
+                          <p className="font-serif text-lg font-semibold leading-snug text-ink">
+                            {article.title}
+                          </p>
 
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">
-                          {article.title}
+                          {article.summary && (
+                            <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-muted">
+                              {article.summary}
+                            </p>
+                          )}
                         </div>
-
-                        {article.summary && (
-                          <div className="mt-1 max-w-md truncate text-sm text-gray-500">
-                            {article.summary}
-                          </div>
-                        )}
                       </td>
 
                       {/* Author */}
-
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-5 align-top text-sm text-ink">
                         {article.author?.name ||
                           article.author?.email ||
                           "Unknown"}
                       </td>
 
                       {/* Section */}
-
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-5 align-top text-sm text-muted">
                         {article.section?.name ||
                           article.section ||
                           "Unknown"}
                       </td>
 
                       {/* Scheduled time */}
-
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {article.scheduledAt
-                          ? new Date(
-                              article.scheduledAt
-                            ).toLocaleString()
-                          : "-"}
+                      <td className="px-6 py-5 align-top">
+                        <p className="text-sm font-medium text-ink">
+                          {article.scheduledAt
+                            ? new Date(
+                                article.scheduledAt
+                              ).toLocaleString()
+                            : "-"}
+                        </p>
                       </td>
 
                       {/* Status */}
-
-                      <td className="px-6 py-4">
-                        <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
-                          SCHEDULED
+                      <td className="px-6 py-5 align-top">
+                        <span className="inline-flex border border-yellow-300 bg-yellow-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-yellow-800">
+                          Scheduled
                         </span>
                       </td>
 
                       {/* Actions */}
-
-                      <td className="px-6 py-4 text-right">
-
+                      <td className="px-6 py-5 align-top">
                         <div className="flex justify-end gap-2">
-
                           <button
                             onClick={() =>
                               handlePublish(article._id)
@@ -303,7 +350,7 @@ const ScheduledArticles = () => {
                               unpublishingId ===
                                 article._id
                             }
-                            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="bg-press px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {publishingId ===
                             article._id
@@ -323,22 +370,30 @@ const ScheduledArticles = () => {
                               unpublishingId ===
                                 article._id
                             }
-                            className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {unpublishingId ===
                             article._id
                               ? "Unpublishing..."
                               : "Unpublish"}
                           </button>
-
                         </div>
                       </td>
                     </tr>
                   ))}
-
                 </tbody>
               </table>
             </div>
+          </section>
+        )}
+
+        {/* Footer note */}
+        {articles.length > 0 && (
+          <div className="mt-5 border-t border-hairline pt-4">
+            <p className="text-xs leading-5 text-muted">
+              Scheduled articles can be published immediately or
+              moved back from the scheduled queue.
+            </p>
           </div>
         )}
       </main>
@@ -347,3 +402,5 @@ const ScheduledArticles = () => {
 };
 
 export default ScheduledArticles;
+
+

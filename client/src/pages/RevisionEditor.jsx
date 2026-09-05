@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
@@ -33,12 +34,6 @@ const RevisionEditor = () => {
         setFetching(true);
         setError("");
 
-        /*
-         * There is currently no GET revision endpoint
-         * in your article controller.
-         *
-         * So we will add that backend endpoint next.
-         */
         const response = await api.get(
           `/articles/revisions/${revisionId}`
         );
@@ -208,10 +203,7 @@ const RevisionEditor = () => {
         navigate("/articles/my");
       }, 800);
     } catch (err) {
-      console.error(
-        "Submit revision error:",
-        err
-      );
+      console.error("Submit revision error:", err);
 
       setError(
         err.response?.data?.message ||
@@ -228,214 +220,261 @@ const RevisionEditor = () => {
 
   if (fetching) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading revision...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <div className="mx-auto flex min-h-[calc(100vh-3px)] max-w-6xl items-center justify-center px-6">
+          <div className="text-center">
+            <p className="font-serif text-2xl text-ink">
+              Loading revision
+            </p>
+
+            <div className="mx-auto mt-4 h-px w-16 bg-press" />
+
+            <p className="mt-3 text-sm text-muted">
+              Preparing the editorial workspace...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!revision) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <main className="mx-auto max-w-6xl px-6 py-12">
+          <div className="border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
             {error || "Revision not found."}
           </div>
-        </div>
+
+          <div className="mt-6">
+            <BackButton />
+          </div>
+        </main>
       </div>
     );
   }
 
-  // ==========================================
-  // PAGE
-  // ==========================================
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <div className="h-[3px] bg-press" />
 
       {/* Header */}
-
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-
+      <header className="border-b border-hairline">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Edit Revision
-            </h1>
-
-            <p className="text-sm text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-press">
               Editorial Workflow
             </p>
+
+            <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight">
+              Edit Revision
+            </h1>
           </div>
 
           <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            className={`border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider ${
               revision.status === "DRAFT"
-                ? "bg-gray-100 text-gray-700"
+                ? "border-hairline bg-white text-muted"
                 : revision.status === "SUBMITTED"
-                ? "bg-yellow-100 text-yellow-700"
+                ? "border-yellow-300 bg-yellow-50 text-yellow-800"
                 : revision.status === "APPROVED"
-                ? "bg-green-100 text-green-700"
+                ? "border-green-300 bg-green-50 text-green-800"
                 : revision.status === "SCHEDULED"
-                ? "bg-purple-100 text-purple-700"
-                : "bg-blue-100 text-blue-700"
+                ? "border-purple-300 bg-purple-50 text-purple-800"
+                : "border-blue-300 bg-blue-50 text-blue-800"
             }`}
           >
             {revision.status}
           </span>
-
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        {/* Back */}
+        <div className="mb-8">
+          <BackButton />
+        </div>
 
-        <BackButton />
+        {/* Page Intro */}
+        <div className="mb-8 border-b border-hairline pb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            Revision Workspace
+          </p>
 
-        {/* Error */}
+          <h2 className="mt-2 max-w-4xl font-serif text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+            Refine the article before sending it back for review.
+          </h2>
 
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+            Update the revision details, make your editorial changes,
+            then save or submit the revised article for review.
+          </p>
+        </div>
+
+        {/* Alerts */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-5 border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+            <span className="font-semibold">Error:</span>{" "}
             {error}
           </div>
         )}
 
-        {/* Success */}
-
         {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+          <div className="mb-5 border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
+            <span className="font-semibold">Success:</span>{" "}
             {success}
           </div>
         )}
 
         {/* Editor */}
+        <section className="border border-hairline bg-white">
+          {/* Section Heading */}
+          <div className="border-b border-hairline px-6 py-5 md:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-press">
+              Revision Editor
+            </p>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-
-          {/* Title */}
-
-          <div className="mb-6">
-            <label
-              htmlFor="title"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Title
-            </label>
-
-            <input
-              id="title"
-              name="title"
-              type="text"
-              value={formData.title}
-              onChange={handleChange}
-              disabled={revision.status !== "DRAFT"}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
+            <h3 className="mt-1 font-serif text-2xl font-semibold">
+              Article Details
+            </h3>
           </div>
 
-          {/* Section */}
+          <div className="space-y-7 px-6 py-7 md:px-8">
+            {/* Title */}
+            <div>
+              <label
+                htmlFor="title"
+                className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-muted"
+              >
+                Title
+              </label>
 
-          <div className="mb-6">
-            <label
-              htmlFor="section"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Section
-            </label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                value={formData.title}
+                onChange={handleChange}
+                disabled={revision.status !== "DRAFT"}
+                className="w-full border border-hairline bg-paper px-4 py-3 font-serif text-xl text-ink outline-none transition focus:border-press disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-muted"
+              />
+            </div>
 
-            <select
-              id="section"
-              name="section"
-              value={formData.section}
-              onChange={handleChange}
-              disabled={
-                sectionsLoading ||
-                revision.status !== "DRAFT"
-              }
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">
-                {sectionsLoading
-                  ? "Loading sections..."
-                  : "Select section"}
-              </option>
+            {/* Section */}
+            <div>
+              <label
+                htmlFor="section"
+                className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-muted"
+              >
+                Section
+              </label>
 
-              {sections.map((section) => (
-                <option
-                  key={section._id}
-                  value={section._id}
-                >
-                  {section.name}
+              <select
+                id="section"
+                name="section"
+                value={formData.section}
+                onChange={handleChange}
+                disabled={
+                  sectionsLoading ||
+                  revision.status !== "DRAFT"
+                }
+                className="w-full border border-hairline bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-press disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-muted"
+              >
+                <option value="">
+                  {sectionsLoading
+                    ? "Loading sections..."
+                    : "Select section"}
                 </option>
-              ))}
-            </select>
-          </div>
 
-          {/* Content */}
+                {sections.map((section) => (
+                  <option
+                    key={section._id}
+                    value={section._id}
+                  >
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="mb-6">
-            <label
-              htmlFor="content"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Article Content
-            </label>
-
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              disabled={revision.status !== "DRAFT"}
-              rows={16}
-              placeholder="Edit your revision..."
-              className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
-          </div>
-
-          {/* Actions */}
-
-          <div className="flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
-
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              disabled={loading}
-              className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Cancel
-            </button>
-
-            {revision.status === "DRAFT" && (
-              <div className="flex flex-col gap-3 sm:flex-row">
-
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            {/* Content */}
+            <div>
+              <div className="mb-2 flex items-end justify-between gap-4">
+                <label
+                  htmlFor="content"
+                  className="block text-xs font-semibold uppercase tracking-[0.12em] text-muted"
                 >
-                  {loading
-                    ? "Saving..."
-                    : "Save Revision"}
-                </button>
+                  Article Content
+                </label>
 
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {loading
-                    ? "Submitting..."
-                    : "Submit for Review"}
-                </button>
-
+                <span className="text-xs text-muted">
+                  Editorial copy
+                </span>
               </div>
-            )}
 
+              <textarea
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
+                disabled={revision.status !== "DRAFT"}
+                rows={18}
+                placeholder="Edit your revision..."
+                className="w-full resize-y border border-hairline bg-paper px-5 py-4 font-serif text-base leading-7 text-ink outline-none transition placeholder:text-muted/70 focus:border-press disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-muted"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-4 border-t border-hairline pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                disabled={loading}
+                className="border border-hairline bg-white px-5 py-2.5 text-sm font-medium text-ink transition hover:border-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              {revision.status === "DRAFT" && (
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="border border-ink px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading
+                      ? "Saving..."
+                      : "Save Revision"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="bg-press px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading
+                      ? "Submitting..."
+                      : "Submit for Review"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
+        </section>
+
+        {/* Footer Note */}
+        <div className="mt-6 border-t border-hairline pt-4">
+          <p className="text-xs leading-5 text-muted">
+            Revision status controls whether the editorial fields can
+            be modified. Draft revisions can be saved or submitted for
+            review.
+          </p>
         </div>
       </main>
     </div>

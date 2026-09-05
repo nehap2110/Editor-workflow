@@ -60,10 +60,16 @@ const OverdueAlerts = () => {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-gray-500">
-          Loading overdue alerts...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <main className="mx-auto max-w-6xl px-6 py-12">
+          <div className="border-y border-hairline py-10">
+            <p className="text-sm text-muted">
+              Loading overdue alerts...
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
@@ -74,175 +80,211 @@ const OverdueAlerts = () => {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
 
-        <div className="mb-4 flex justify-end">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            ← Back to Dashboard
-          </button>
-        </div>
+        <main className="mx-auto max-w-6xl px-6 py-10">
+          <div className="mb-8 flex justify-end">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="border border-hairline px-4 py-2 text-sm font-medium text-muted transition hover:border-press hover:text-press"
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
 
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
+          <div className="border border-press/30 bg-white px-6 py-5">
+            <p className="text-sm font-medium text-press">
+              {error}
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <div className="h-[3px] bg-press" />
 
-      {/* Header */}
+      <main className="mx-auto max-w-6xl px-6 py-10">
 
-      <div className="mb-6 flex items-start justify-between">
+        {/* Header */}
+        <div className="mb-10 border-b border-hairline pb-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Overdue Publish Alerts
-          </h1>
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                Publishing Monitor
+              </p>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Scheduled articles whose publish time has passed
-            but have not been published yet.
-          </p>
-        </div>
+              <h1 className="font-serif text-4xl leading-tight text-ink">
+                Overdue Publish Alerts
+              </h1>
 
-        {/* Back Button */}
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+                Scheduled articles whose publish time has passed
+                but have not been published yet.
+              </p>
+            </div>
 
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          ← Back to Dashboard
-        </button>
-
-      </div>
-
-      {/* Empty state */}
-
-      {alerts.length === 0 ? (
-        <div className="rounded-lg border bg-white p-10 text-center">
-
-          <h2 className="text-lg font-semibold text-gray-900">
-            No overdue articles
-          </h2>
-
-          <p className="mt-2 text-sm text-gray-500">
-            All scheduled articles are currently on time.
-          </p>
-
-        </div>
-      ) : (
-
-        <div className="overflow-hidden rounded-lg border bg-white">
-
-          <div className="overflow-x-auto">
-
-            <table className="min-w-full divide-y divide-gray-200">
-
-              <thead className="bg-gray-50">
-
-                <tr>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-                    Article
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-                    Section
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-                    Author
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-                    Scheduled Time
-                  </th>
-
-                  <th className="px-6 py-3 text-right text-xs font-semibold uppercase text-gray-500">
-                    Action
-                  </th>
-
-                </tr>
-
-              </thead>
-
-              <tbody className="divide-y divide-gray-200">
-
-                {alerts.map((article) => (
-
-                  <tr key={article._id}>
-
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">
-                        {article.title}
-                      </p>
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {article.section?.name || "—"}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {article.author?.name ||
-                        article.author?.email ||
-                        "—"}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-red-600">
-                      {article.scheduledAt
-                        ? new Date(
-                            article.scheduledAt
-                          ).toLocaleString()
-                        : "—"}
-                    </td>
-
-                    <td className="px-6 py-4 text-right">
-
-                      <div className="flex justify-end gap-2">
-
-                        <button
-                          onClick={() =>
-                            navigate(
-                              `/articles/${article._id}`
-                            )
-                          }
-                          className="rounded-md border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                          View
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            dismissAlert(article._id)
-                          }
-                          className="rounded-md bg-gray-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-                        >
-                          Dismiss
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-fit border border-hairline px-4 py-2 text-sm font-medium text-muted transition hover:border-press hover:text-press"
+            >
+              ← Back to Dashboard
+            </button>
 
           </div>
-
         </div>
 
-      )}
+        {/* Alert count */}
+        <div className="mb-6 flex items-center justify-between border-b border-hairline pb-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              Pending Alerts
+            </p>
+            <p className="mt-1 font-serif text-2xl text-ink">
+              {alerts.length}
+            </p>
+          </div>
 
+          {alerts.length > 0 && (
+            <span className="border border-press/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-press">
+              Action Required
+            </span>
+          )}
+        </div>
+
+        {/* Empty State */}
+        {alerts.length === 0 ? (
+          <div className="border-y border-hairline bg-white px-6 py-14 text-center">
+            <div className="mx-auto max-w-md">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                All Clear
+              </p>
+
+              <h2 className="font-serif text-2xl text-ink">
+                No overdue articles
+              </h2>
+
+              <p className="mt-3 text-sm leading-6 text-muted">
+                All scheduled articles are currently on time.
+              </p>
+            </div>
+          </div>
+        ) : (
+
+          /* Alerts Table */
+          <div className="overflow-hidden border-y border-hairline bg-white">
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+
+                <thead>
+                  <tr className="border-b border-hairline bg-paper">
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                      Article
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                      Section
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                      Author
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                      Scheduled Time
+                    </th>
+
+                    <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {alerts.map((article) => (
+                    <tr
+                      key={article._id}
+                      className="border-b border-hairline last:border-b-0 hover:bg-paper/60"
+                    >
+
+                      {/* Article */}
+                      <td className="px-6 py-5">
+                        <div className="max-w-xs">
+                          <p className="font-serif text-lg leading-snug text-ink">
+                            {article.title}
+                          </p>
+
+                          <p className="mt-1 text-xs uppercase tracking-wider text-press">
+                            Overdue
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Section */}
+                      <td className="px-6 py-5 text-sm text-muted">
+                        {article.section?.name || "—"}
+                      </td>
+
+                      {/* Author */}
+                      <td className="px-6 py-5 text-sm text-muted">
+                        {article.author?.name ||
+                          article.author?.email ||
+                          "—"}
+                      </td>
+
+                      {/* Scheduled Time */}
+                      <td className="px-6 py-5">
+                        <p className="text-sm font-medium text-press">
+                          {article.scheduledAt
+                            ? new Date(
+                                article.scheduledAt
+                              ).toLocaleString()
+                            : "—"}
+                        </p>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-5">
+                        <div className="flex justify-end gap-2">
+
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/articles/${article._id}`
+                              )
+                            }
+                            className="border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition hover:border-ink hover:text-ink"
+                          >
+                            View
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              dismissAlert(article._id)
+                            }
+                            className="bg-ink px-3 py-1.5 text-sm font-medium text-white transition hover:bg-press"
+                          >
+                            Dismiss
+                          </button>
+
+                        </div>
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+        )}
+
+      </main>
     </div>
   );
 };

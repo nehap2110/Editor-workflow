@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -24,16 +25,11 @@ const PublishedArticles = () => {
       setLoading(true);
       setError("");
 
-      const response = await api.get(
-        "/articles/published"
-      );
+      const response = await api.get("/articles/published");
 
       setArticles(response.data.articles || []);
     } catch (err) {
-      console.error(
-        "Fetch published articles error:",
-        err
-      );
+      console.error("Fetch published articles error:", err);
 
       setError(
         err.response?.data?.message ||
@@ -55,9 +51,7 @@ const PublishedArticles = () => {
   const handleSelectArticle = (id) => {
     setSelectedArticles((prev) =>
       prev.includes(id)
-        ? prev.filter(
-            (articleId) => articleId !== id
-          )
+        ? prev.filter((articleId) => articleId !== id)
         : [...prev, id]
     );
 
@@ -71,9 +65,7 @@ const PublishedArticles = () => {
   // ==========================================
 
   const handleSelectAll = () => {
-    if (
-      selectedArticles.length === articles.length
-    ) {
+    if (selectedArticles.length === articles.length) {
       setSelectedArticles([]);
     } else {
       setSelectedArticles(
@@ -96,9 +88,7 @@ const PublishedArticles = () => {
     setBulkResults([]);
 
     if (selectedArticles.length === 0) {
-      setError(
-        "Please select at least one article."
-      );
+      setError("Please select at least one article.");
       return;
     }
 
@@ -150,15 +140,9 @@ const PublishedArticles = () => {
 
       setSelectedArticles([]);
 
-      // Refresh list.
-      // Successfully unpublished articles will disappear
-      // because they are no longer PUBLISHED.
       await fetchPublishedArticles();
     } catch (err) {
-      console.error(
-        "Bulk unpublish error:",
-        err
-      );
+      console.error("Bulk unpublish error:", err);
 
       setError(
         err.response?.data?.message ||
@@ -175,10 +159,16 @@ const PublishedArticles = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading published articles...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <main className="mx-auto max-w-6xl px-6 py-12">
+          <div className="border-y border-hairline py-10">
+            <p className="text-sm text-muted">
+              Loading published articles...
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
@@ -188,41 +178,49 @@ const PublishedArticles = () => {
   // ==========================================
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-5">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Published Articles
-          </h1>
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      <div className="h-[3px] bg-press" />
 
-          <p className="mt-1 text-sm text-gray-500">
-            Articles that have been approved and
-            published.
-          </p>
-        </div>
-      </header>
+      <main className="mx-auto max-w-6xl px-6 py-10">
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
+        {/* Header */}
+        <div className="mb-8 border-b border-hairline pb-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 
-        {/* Back */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                Publication Archive
+              </p>
 
-        <div className="mb-6">
-          <BackButton label="Back" />
+              <h1 className="font-serif text-4xl leading-tight text-ink">
+                Published Articles
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+                Articles that have been approved and published.
+              </p>
+            </div>
+
+            <BackButton label="Back" />
+
+          </div>
         </div>
 
         {/* Error */}
-
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+          <div className="mb-6 border border-press/30 bg-white px-5 py-4">
+            <p className="text-sm font-medium text-press">
+              {error}
+            </p>
           </div>
         )}
 
         {/* Success */}
-
         {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
+          <div className="mb-6 border border-hairline bg-white px-5 py-4">
+            <p className="text-sm font-medium text-ink">
+              {success}
+            </p>
           </div>
         )}
 
@@ -231,27 +229,21 @@ const PublishedArticles = () => {
         ========================================== */}
 
         {articles.length > 0 && (
-          <div className="mb-6 rounded-xl border bg-white p-5 shadow-sm">
+          <div className="mb-8 border-y border-hairline bg-white px-5 py-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
-                <p className="text-sm font-semibold text-gray-800">
+                <p className="font-serif text-xl text-ink">
                   {selectedArticles.length} article
-                  {selectedArticles.length !== 1
-                    ? "s"
-                    : ""}{" "}
-                  selected
+                  {selectedArticles.length !== 1 ? "s" : ""} selected
                 </p>
 
-                <p className="mt-1 text-xs text-gray-500">
-                  Select published articles to
-                  unpublish them in bulk.
+                <p className="mt-1 text-xs leading-5 text-muted">
+                  Select published articles to unpublish them in bulk.
                 </p>
               </div>
 
               <div className="flex gap-3">
-
-                {/* Bulk Unpublish */}
 
                 <button
                   onClick={handleBulkUnpublish}
@@ -259,14 +251,12 @@ const PublishedArticles = () => {
                     selectedArticles.length === 0 ||
                     bulkUnpublishing
                   }
-                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="bg-press px-4 py-2 text-sm font-medium text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {bulkUnpublishing
                     ? "Unpublishing..."
                     : "Unpublish Selected"}
                 </button>
-
-                {/* Clear */}
 
                 <button
                   onClick={() => {
@@ -279,10 +269,11 @@ const PublishedArticles = () => {
                     selectedArticles.length === 0 ||
                     bulkUnpublishing
                   }
-                  className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border border-hairline px-4 py-2 text-sm font-medium text-muted transition hover:border-ink hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Clear
                 </button>
+
               </div>
             </div>
           </div>
@@ -293,25 +284,31 @@ const PublishedArticles = () => {
         ========================================== */}
 
         {bulkResults.length > 0 && (
-          <div className="mb-6 rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Bulk Unpublish Results
-            </h2>
+          <div className="mb-8 border-y border-hairline bg-white px-5 py-5">
 
-            <div className="mt-4 space-y-2">
+            <div className="mb-4 border-b border-hairline pb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-press">
+                Operation Results
+              </p>
+
+              <h2 className="mt-1 font-serif text-2xl text-ink">
+                Bulk Unpublish Results
+              </h2>
+            </div>
+
+            <div className="space-y-2">
               {bulkResults.map((result) => {
                 const article = articles.find(
-                  (item) =>
-                    item._id === result.articleId
+                  (item) => item._id === result.articleId
                 );
 
                 return (
                   <div
                     key={result.articleId}
-                    className={`rounded-md border p-3 text-sm ${
+                    className={`border px-4 py-3 text-sm ${
                       result.success
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-red-200 bg-red-50 text-red-700"
+                        ? "border-hairline bg-paper text-ink"
+                        : "border-press/30 bg-white text-press"
                     }`}
                   >
                     <div className="font-medium">
@@ -319,7 +316,7 @@ const PublishedArticles = () => {
                         `Article ${result.articleId}`}
                     </div>
 
-                    <div className="mt-1">
+                    <div className="mt-1 text-xs text-muted">
                       {result.message}
                     </div>
                   </div>
@@ -334,31 +331,37 @@ const PublishedArticles = () => {
         ========================================== */}
 
         {articles.length === 0 ? (
-          <div className="rounded-xl border bg-white p-10 text-center">
-            <h2 className="text-lg font-semibold text-gray-800">
+          <div className="border-y border-hairline bg-white px-6 py-14 text-center">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-press">
+              Publication Archive
+            </p>
+
+            <h2 className="font-serif text-2xl text-ink">
               No published articles
             </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-muted">
               Published articles will appear here.
             </p>
           </div>
         ) : (
+
+          /* ==========================================
+              ARTICLES
+          ========================================== */
+
           <div className="grid gap-6 md:grid-cols-2">
 
             {articles.map((article) => (
               <article
                 key={article._id}
-                className="rounded-xl border bg-white p-6 shadow-sm"
+                className="border-y border-hairline bg-white p-6 transition hover:border-press"
               >
 
                 {/* Top Row */}
+                <div className="flex items-center justify-between gap-4">
 
-                <div className="flex items-center justify-between">
-
-                  <div className="flex items-center gap-3">
-
-                    {/* Checkbox */}
+                  <div className="flex min-w-0 items-center gap-3">
 
                     <input
                       type="checkbox"
@@ -366,43 +369,44 @@ const PublishedArticles = () => {
                         article._id
                       )}
                       onChange={() =>
-                        handleSelectArticle(
-                          article._id
-                        )
+                        handleSelectArticle(article._id)
                       }
                       disabled={bulkUnpublishing}
-                      className="h-4 w-4 rounded border-gray-300"
+                      className="h-4 w-4 accent-press"
                     />
 
-                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <span className="truncate text-xs font-semibold uppercase tracking-[0.14em] text-muted">
                       {article.section?.name ||
                         article.section ||
                         "Unknown"}
                     </span>
+
                   </div>
 
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                    PUBLISHED
+                  <span className="shrink-0 border border-hairline px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-press">
+                    Published
                   </span>
+
                 </div>
 
                 {/* Article */}
-
-                <h2 className="mt-4 text-xl font-bold text-gray-900">
+                <h2 className="mt-5 font-serif text-2xl leading-tight text-ink">
                   {article.title}
                 </h2>
 
                 {article.summary && (
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">
                     {article.summary}
                   </p>
                 )}
 
-                {/* Author */}
+                {/* Divider */}
+                <div className="my-5 border-t border-hairline" />
 
-                <div className="mt-5 text-xs text-gray-500">
+                {/* Author */}
+                <div className="text-xs text-muted">
                   By{" "}
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-ink">
                     {article.author?.name ||
                       article.author?.email ||
                       "Unknown"}
@@ -410,9 +414,8 @@ const PublishedArticles = () => {
                 </div>
 
                 {/* Published Date */}
-
                 {article.publishedAt && (
-                  <div className="mt-1 text-xs text-gray-400">
+                  <div className="mt-1 text-xs text-muted">
                     Published{" "}
                     {new Date(
                       article.publishedAt
@@ -421,7 +424,6 @@ const PublishedArticles = () => {
                 )}
 
                 {/* Read */}
-
                 <button
                   onClick={() =>
                     navigate(
@@ -429,12 +431,14 @@ const PublishedArticles = () => {
                     )
                   }
                   disabled={bulkUnpublishing}
-                  className="mt-5 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-5 border border-ink bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-press hover:border-press disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Read Article
+                  Read Article →
                 </button>
+
               </article>
             ))}
+
           </div>
         )}
 
@@ -443,31 +447,34 @@ const PublishedArticles = () => {
         ========================================== */}
 
         {articles.length > 0 && (
-          <div className="mt-6 flex items-center gap-2">
+          <div className="mt-6 flex items-center gap-2 border-t border-hairline pt-5">
+
             <input
               id="select-all"
               type="checkbox"
               checked={
-                selectedArticles.length ===
-                  articles.length &&
+                selectedArticles.length === articles.length &&
                 articles.length > 0
               }
               onChange={handleSelectAll}
               disabled={bulkUnpublishing}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 accent-press"
             />
 
             <label
               htmlFor="select-all"
-              className="text-sm text-gray-600"
+              className="text-sm text-muted"
             >
               Select all published articles
             </label>
+
           </div>
         )}
+
       </main>
     </div>
   );
 };
 
 export default PublishedArticles;
+

@@ -4,591 +4,463 @@ import api from "../services/api";
 import BackButton from "../components/BackButton.jsx";
 
 const SectionDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const { id } = useParams();
+const navigate = useNavigate();
 
-  const [section, setSection] = useState(null);
-  const [writers, setWriters] = useState([]);
-  const [selectedWriter, setSelectedWriter] = useState("");
+const [section, setSection] = useState(null);
+const [writers, setWriters] = useState([]);
+const [selectedWriter, setSelectedWriter] = useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [assigning, setAssigning] = useState(false);
+const [loading, setLoading] = useState(true);
+const [assigning, setAssigning] = useState(false);
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+const [error, setError] = useState("");
+const [success, setSuccess] = useState("");
 
-  const [articles, setArticles] = useState([]);
-const [articlesLoading, setArticlesLoading] = useState(true);
+// ==========================================
+// FETCH SECTION
+// ==========================================
 
-  // ==========================================
-  // FETCH SECTION
-  // ==========================================
+const fetchSection = async () => {
+try {
+setLoading(true);
+setError("");
 
-  const fetchSection = async () => {
-    try {
-      setLoading(true);
-      setError("");
 
-      const response = await api.get(`/sections/${id}`);
+  const response = await api.get(`/sections/${id}`);
 
-      setSection(response.data.section);
-    } catch (err) {
-      console.error("Fetch section error:", err);
+  setSection(response.data.section);
+} catch (err) {
+  console.error("Fetch section error:", err);
 
-      setError(
-        err.response?.data?.message ||
-          "Failed to load section."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  setError(
+    err.response?.data?.message ||
+      "Failed to load section."
+  );
+} finally {
+  setLoading(false);
+}
 
-  // ==========================================
-  // FETCH WRITERS
-  // ==========================================
 
-  const fetchWriters = async () => {
-    try {
-      const response = await api.get("/users/writers");
-
-      setWriters(response.data.users || []);
-    } catch (err) {
-      console.error("Fetch writers error:", err);
-
-      setError(
-        err.response?.data?.message ||
-          "Failed to load writers."
-      );
-    }
-  };
-
-  const fetchArticles = async () => {
-  try {
-    setArticlesLoading(true);
-
-    const response = await api.get(
-      `/articles?section=${id}`
-    );
-
-    setArticles(response.data.articles || []);
-  } catch (err) {
-    console.error("Fetch articles error:", err);
-
-    setError(
-      err.response?.data?.message ||
-        "Failed to load section articles."
-    );
-  } finally {
-    setArticlesLoading(false);
-  }
 };
 
-  useEffect(() => {
-    fetchSection();
-    fetchWriters();
-     fetchArticles();
-  }, [id]);
+// ==========================================
+// FETCH WRITERS
+// ==========================================
 
-  // ==========================================
-  // ASSIGN WRITER
-  // ==========================================
+const fetchWriters = async () => {
+try {
+const response = await api.get("/users/writers");
 
-  const handleAssignWriter = async () => {
-    if (!selectedWriter) {
-      setError("Please select a writer.");
-      return;
-    }
 
-    try {
-      setAssigning(true);
-      setError("");
-      setSuccess("");
+  setWriters(response.data.users || []);
+} catch (err) {
+  console.error("Fetch writers error:", err);
 
-      const response = await api.post(
-        `/sections/${id}/writers/${selectedWriter}`
-      );
+  setError(
+    err.response?.data?.message ||
+      "Failed to load writers."
+  );
+}
 
-      setSection(response.data.section);
 
-      setSelectedWriter("");
+};
 
-      setSuccess("Writer assigned successfully.");
-    } catch (err) {
-      console.error("Assign writer error:", err);
+useEffect(() => {
+fetchSection();
+fetchWriters();
+}, [id]);
 
-      setError(
-        err.response?.data?.message ||
-          "Failed to assign writer."
-      );
-    } finally {
-      setAssigning(false);
-    }
-  };
+// ==========================================
+// ASSIGN WRITER
+// ==========================================
 
-  // ==========================================
-  // REMOVE WRITER
-  // ==========================================
+const handleAssignWriter = async () => {
+if (!selectedWriter) {
+setError("Please select a writer.");
+return;
+}
 
-  const handleRemoveWriter = async (writerId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to remove this writer from the section?"
-    );
 
-    if (!confirmed) {
-      return;
-    }
+try {
+  setAssigning(true);
+  setError("");
+  setSuccess("");
 
-    try {
-      setError("");
-      setSuccess("");
+  const response = await api.post(
+    `/sections/${id}/writers/${selectedWriter}`
+  );
 
-      const response = await api.delete(
-        `/sections/${id}/writers/${writerId}`
-      );
+  setSection(response.data.section);
 
-      setSection(response.data.section);
+  setSelectedWriter("");
 
-      setSuccess("Writer removed successfully.");
-    } catch (err) {
-      console.error("Remove writer error:", err);
+  setSuccess("Writer assigned successfully.");
+} catch (err) {
+  console.error("Assign writer error:", err);
 
-      setError(
-        err.response?.data?.message ||
-          "Failed to remove writer."
-      );
-    }
-  };
+  setError(
+    err.response?.data?.message ||
+      "Failed to assign writer."
+  );
+} finally {
+  setAssigning(false);
+}
 
-  // ==========================================
-  // LOADING
-  // ==========================================
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading section...
+};
+
+// ==========================================
+// REMOVE WRITER
+// ==========================================
+
+const handleRemoveWriter = async (writerId) => {
+const confirmed = window.confirm(
+"Are you sure you want to remove this writer from the section?"
+);
+
+
+if (!confirmed) {
+  return;
+}
+
+try {
+  setError("");
+  setSuccess("");
+
+  const response = await api.delete(
+    `/sections/${id}/writers/${writerId}`
+  );
+
+  setSection(response.data.section);
+
+  setSuccess("Writer removed successfully.");
+} catch (err) {
+  console.error("Remove writer error:", err);
+
+  setError(
+    err.response?.data?.message ||
+      "Failed to remove writer."
+  );
+}
+
+
+};
+
+// ==========================================
+// LOADING
+// ==========================================
+
+if (loading) {
+return ( <div className="min-h-screen bg-paper font-sans text-ink antialiased"> <div className="h-[3px] bg-press" />
+
+
+    <div className="flex min-h-[80vh] items-center justify-center">
+      <div className="text-center">
+        <p className="font-serif text-2xl">
+          Loading section
+        </p>
+
+        <p className="mt-2 text-sm text-muted">
+          Preparing the editorial desk...
         </p>
       </div>
-    );
-  }
+    </div>
+  </div>
+);
 
-  // ==========================================
-  // ERROR / NO SECTION
-  // ==========================================
 
-  if (!section) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="mx-auto max-w-5xl">
+}
 
-          {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+// ==========================================
+// ERROR / NO SECTION
+// ==========================================
 
-          <BackButton label="Back to Sections" />
+if (!section) {
+return ( <div className="min-h-screen bg-paper font-sans text-ink antialiased"> <div className="h-[3px] bg-press" />
 
+
+    <main className="mx-auto max-w-6xl px-6 py-10">
+      {error && (
+        <div className="mb-6 border-l-4 border-press bg-[#F5E9E6] px-4 py-3 text-sm text-press">
+          {error}
         </div>
+      )}
+
+      <BackButton label="Back to Sections" />
+    </main>
+  </div>
+);
+
+
+}
+
+// ==========================================
+// GET ASSIGNED WRITER IDS
+// ==========================================
+
+const assignedWriterIds =
+section.writers?.map((writer) =>
+writer._id.toString()
+) || [];
+
+// ==========================================
+// PAGE
+// ==========================================
+
+return ( <div className="min-h-screen bg-paper font-sans text-ink antialiased"> <div className="h-[3px] bg-press" />
+
+
+  {/* Header */}
+  <header className="border-b border-hairline">
+    <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
+          Editorial Desk
+        </p>
+
+        <h1 className="mt-1 font-serif text-2xl font-semibold">
+          Manage Section
+        </h1>
+
+        <p className="mt-1 text-sm text-muted">
+          Writer assignments and section oversight.
+        </p>
       </div>
-    );
-  }
 
-  // ==========================================
-  // GET ASSIGNED WRITER IDS
-  // ==========================================
-
-  const assignedWriterIds =
-    section.writers?.map((writer) =>
-      writer._id.toString()
-    ) || [];
-
-  // ==========================================
-  // PAGE
-  // ==========================================
-
-  return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* ======================================
-          HEADER
-      ====================================== */}
-
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Manage Section
-            </h1>
-
-            <p className="text-sm text-gray-500">
-              Editorial Workflow
-            </p>
-          </div>
-
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              section.archived
-                ? "bg-gray-100 text-gray-600"
-                : "bg-green-100 text-green-700"
-            }`}
-          >
-            {section.archived
-              ? "ARCHIVED"
-              : "ACTIVE"}
-          </span>
-
-        </div>
-      </header>
-
-
-
-      {/* ======================================
-          MAIN
-      ====================================== */}
-
-      <main className="mx-auto max-w-5xl px-6 py-8">
-
-        {/* Back */}
-
-        <div className="mb-6">
-          <BackButton label="Back to Sections" />
-        </div>
-
-        {/* Error */}
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Success */}
-
-        {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
-        {/* ====================================
-            SECTION INFORMATION
-        ==================================== */}
-
-        <section className="rounded-xl border bg-white p-6 shadow-sm">
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-
-            <div>
-              <p className="text-sm font-medium text-gray-500">
-                Section
-              </p>
-
-              <h2 className="mt-1 text-2xl font-bold text-gray-900">
-                {section.name}
-              </h2>
-
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-600">
-                {section.description}
-              </p>
-            </div>
-
-          </div>
-
-          {/* Owner */}
-
-          <div className="mt-6 border-t pt-5">
-
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Section Owner
-            </p>
-
-            <p className="mt-1 text-sm font-medium text-gray-800">
-              {section.owner?.name ||
-                section.owner?.email ||
-                "Unknown"}
-            </p>
-
-            {section.owner?.email && (
-              <p className="mt-1 text-xs text-gray-500">
-                {section.owner.email}
-              </p>
-            )}
-
-          </div>
-
-        </section>
-
-        {/* ====================================
-            ASSIGN WRITER
-        ==================================== */}
-
-        {!section.archived && (
-          <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
-
-            <h2 className="text-lg font-semibold text-gray-900">
-              Assign Writer
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500">
-              Assign a writer to this editorial section.
-            </p>
-
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-
-              <select
-                value={selectedWriter}
-                onChange={(event) =>
-                  setSelectedWriter(event.target.value)
-                }
-                disabled={assigning}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:bg-gray-100"
-              >
-
-                <option value="">
-                  Select writer
-                </option>
-
-                {writers
-                  .filter(
-                    (writer) =>
-                      !assignedWriterIds.includes(
-                        writer._id.toString()
-                      )
-                  )
-                  .map((writer) => (
-                    <option
-                      key={writer._id}
-                      value={writer._id}
-                    >
-                      {writer.name || writer.email}
-                    </option>
-                  ))}
-
-              </select>
-
-              <button
-                type="button"
-                onClick={handleAssignWriter}
-                disabled={assigning || !selectedWriter}
-                className="rounded-lg bg-gray-900 px-5 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {assigning
-                  ? "Assigning..."
-                  : "Assign Writer"}
-              </button>
-
-            </div>
-
-          </section>
-        )}
-
-        {/* ====================================
-            ASSIGNED WRITERS
-        ==================================== */}
-
-        <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
-
-          <div className="flex items-center justify-between">
-
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Assigned Writers
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Writers currently assigned to this section.
-              </p>
-            </div>
-
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-              {section.writers?.length || 0}
-            </span>
-
-          </div>
-
-          {/* No writers */}
-
-          {!section.writers ||
-          section.writers.length === 0 ? (
-            <div className="mt-5 rounded-lg border border-dashed border-gray-300 p-8 text-center">
-
-              <p className="text-sm text-gray-500">
-                No writers are currently assigned.
-              </p>
-
-            </div>
-          ) : (
-            <div className="mt-5 space-y-3">
-
-              {section.writers.map((writer) => (
-                <div
-                  key={writer._id}
-                  className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-
-                  <div>
-
-                    <p className="text-sm font-semibold text-gray-900">
-                      {writer.name || "Unnamed Writer"}
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      {writer.email}
-                    </p>
-
-                  </div>
-
-                  {!section.archived && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRemoveWriter(writer._id)
-                      }
-                      className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
-                    >
-                      Remove
-                    </button>
-                  )}
-
-                </div>
-              ))}
-
-            </div>
-          )}
-
-        </section>
-
-        {/* ====================================
-    SECTION ARTICLES
-==================================== */}
-
-<section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
-
-  <div className="flex items-center justify-between">
-
-    <div>
-      <h2 className="text-lg font-semibold text-gray-900">
-        Articles
+      <span
+        className={`shrink-0 border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
+          section.archived
+            ? "border-hairline bg-paper text-muted"
+            : "border-[#C9C5B9] bg-[#EFEEE8] text-ink"
+        }`}
+      >
+        {section.archived
+          ? "Archived"
+          : "Active"}
+      </span>
+    </div>
+  </header>
+
+  <main className="mx-auto max-w-6xl px-6 py-8">
+    {/* Back */}
+    <div className="mb-7">
+      <BackButton label="Back to Sections" />
+    </div>
+
+    {/* Page heading */}
+    <div className="mb-8 border-b border-hairline pb-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+        Section Overview
+      </p>
+
+      <h2 className="mt-2 font-serif text-4xl font-semibold tracking-tight">
+        {section.name}
       </h2>
 
-      <p className="mt-1 text-sm text-gray-500">
-        Articles published or created in this section.
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+        {section.description}
       </p>
     </div>
 
-    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-      {articles.length}
-    </span>
+    {/* Messages */}
+    {error && (
+      <div className="mb-6 border-l-4 border-press bg-[#F5E9E6] px-4 py-3 text-sm text-press">
+        {error}
+      </div>
+    )}
 
-  </div>
+    {success && (
+      <div className="mb-6 border-l-4 border-ink bg-[#EFEEE8] px-4 py-3 text-sm text-ink">
+        {success}
+      </div>
+    )}
 
-  {articlesLoading ? (
-    <div className="mt-5 rounded-lg border p-6 text-center">
-      <p className="text-sm text-gray-500">
-        Loading articles...
-      </p>
-    </div>
-  ) : articles.length === 0 ? (
-    <div className="mt-5 rounded-lg border border-dashed border-gray-300 p-8 text-center">
-      <p className="text-sm text-gray-500">
-        No articles in this section.
-      </p>
-    </div>
-  ) : (
-    <div className="mt-5 overflow-x-auto">
+    {/* ====================================
+        SECTION INFORMATION
+    ==================================== */}
 
-      <table className="min-w-full divide-y divide-gray-200">
+    <section className="border border-hairline bg-white">
+      <div className="border-b border-hairline px-6 py-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-press">
+          Section Information
+        </p>
 
-        <thead className="bg-gray-50">
-          <tr>
+        <h3 className="mt-1 font-serif text-2xl font-semibold">
+          Editorial Ownership
+        </h3>
+      </div>
 
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-              Article
-            </th>
+      <div className="grid gap-6 px-6 py-6 sm:grid-cols-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            Section Owner
+          </p>
 
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-              Author
-            </th>
+          <p className="mt-2 text-sm font-semibold text-ink">
+            {section.owner?.name ||
+              section.owner?.email ||
+              "Unknown"}
+          </p>
 
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">
-              Status
-            </th>
+          {section.owner?.email && (
+            <p className="mt-1 text-xs text-muted">
+              {section.owner.email}
+            </p>
+          )}
+        </div>
 
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">
-              Action
-            </th>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            Assigned Writers
+          </p>
 
-          </tr>
-        </thead>
+          <p className="mt-2 font-serif text-2xl font-semibold">
+            {section.writers?.length || 0}
+          </p>
+        </div>
+      </div>
+    </section>
 
-        <tbody className="divide-y divide-gray-200">
+    {/* ====================================
+        ASSIGN WRITER
+    ==================================== */}
 
-          {articles.map((article) => (
+    {!section.archived && (
+      <section className="mt-6 border border-hairline bg-white">
+        <div className="border-b border-hairline px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-press">
+            Assignment
+          </p>
 
-            <tr key={article._id}>
+          <h3 className="mt-1 font-serif text-2xl font-semibold">
+            Assign Writer
+          </h3>
 
-              <td className="px-4 py-4">
+          <p className="mt-1 text-sm text-muted">
+            Add a writer to this editorial section.
+          </p>
+        </div>
 
-                <p className="font-medium text-gray-900">
-                  {article.title}
+        <div className="flex flex-col gap-3 px-6 py-6 sm:flex-row">
+          <select
+            value={selectedWriter}
+            onChange={(event) =>
+              setSelectedWriter(event.target.value)
+            }
+            disabled={assigning}
+            className="flex-1 border border-hairline bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-press disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <option value="">
+              Select writer
+            </option>
+
+            {writers
+              .filter(
+                (writer) =>
+                  !assignedWriterIds.includes(
+                    writer._id.toString()
+                  )
+              )
+              .map((writer) => (
+                <option
+                  key={writer._id}
+                  value={writer._id}
+                >
+                  {writer.name || writer.email}
+                </option>
+              ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={handleAssignWriter}
+            disabled={assigning || !selectedWriter}
+            className="border border-ink bg-ink px-6 py-3 text-sm font-semibold text-paper transition hover:border-press hover:bg-press disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {assigning
+              ? "Assigning..."
+              : "Assign Writer"}
+          </button>
+        </div>
+      </section>
+    )}
+
+    {/* ====================================
+        ASSIGNED WRITERS
+    ==================================== */}
+
+    <section className="mt-6 border border-hairline bg-white">
+      <div className="flex items-center justify-between border-b border-hairline px-6 py-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted">
+            Current Team
+          </p>
+
+          <h3 className="mt-1 font-serif text-2xl font-semibold">
+            Assigned Writers
+          </h3>
+
+          <p className="mt-1 text-sm text-muted">
+            Writers currently assigned to this section.
+          </p>
+        </div>
+
+        <span className="border border-hairline bg-paper px-3 py-1.5 font-serif text-lg font-semibold">
+          {section.writers?.length || 0}
+        </span>
+      </div>
+
+      {/* No writers */}
+      {!section.writers ||
+      section.writers.length === 0 ? (
+        <div className="px-6 py-14 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-press">
+            No Assignments
+          </p>
+
+          <p className="mt-2 text-sm text-muted">
+            No writers are currently assigned to this section.
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y divide-hairline">
+          {section.writers.map((writer) => (
+            <div
+              key={writer._id}
+              className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="font-serif text-lg font-semibold">
+                  {writer.name || "Unnamed Writer"}
                 </p>
 
-                {article.summary && (
-                  <p className="mt-1 max-w-md truncate text-xs text-gray-500">
-                    {article.summary}
-                  </p>
-                )}
+                <p className="mt-1 text-xs text-muted">
+                  {writer.email}
+                </p>
+              </div>
 
-              </td>
-
-              <td className="px-4 py-4 text-sm text-gray-600">
-                {article.author?.name ||
-                  article.author?.email ||
-                  "—"}
-              </td>
-
-              <td className="px-4 py-4">
-
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
-                  {article.status}
-                </span>
-
-              </td>
-
-              <td className="px-4 py-4 text-right">
-
+              {!section.archived && (
                 <button
                   type="button"
                   onClick={() =>
-                    navigate(`/articles/${article._id}`)
+                    handleRemoveWriter(writer._id)
                   }
-                  className="rounded-md border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="self-start border border-press px-4 py-2 text-sm font-semibold text-press transition hover:bg-press hover:text-paper sm:self-auto"
                 >
-                  View
+                  Remove
                 </button>
-
-              </td>
-
-            </tr>
-
+              )}
+            </div>
           ))}
+        </div>
+      )}
+    </section>
+  </main>
+</div>
 
-        </tbody>
 
-      </table>
-
-    </div>
-  )}
-
-</section>
-
-      </main>
-    </div>
-  );
+);
 };
 
 export default SectionDetail;

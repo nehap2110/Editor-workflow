@@ -1,30 +1,20 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 import api from "../services/api";
 import BackButton from "../components/BackButton.jsx";
 
 const ArticleEditor = () => {
-  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
 
   const isEditing = Boolean(id);
-  const isEditor = user?.role === "editor";
-  const isWriter = user?.role === "writer";
-
-  const [sections, setSections] = useState([]);
-  const [writers, setWriters] = useState([]);
-
-  const [sectionsLoading, setSectionsLoading] = useState(false);
-  const [writersLoading, setWritersLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     summary: "",
     section: "",
     content: "",
-    author: "",
   });
 
   const [status, setStatus] = useState("DRAFT");
@@ -34,10 +24,9 @@ const ArticleEditor = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ==========================================
+  
   // FETCH ARTICLE WHEN EDITING
-  // ==========================================
-
+  
   useEffect(() => {
     if (!isEditing) return;
 
@@ -47,10 +36,8 @@ const ArticleEditor = () => {
         setError("");
 
         const response = await api.get(`/articles/${id}`);
-
         const article = response.data.article;
 
-        // Only Draft and Changes Requested can be edited
         if (
           article.status !== "DRAFT" &&
           article.status !== "CHANGES_REQUESTED"
@@ -64,15 +51,8 @@ const ArticleEditor = () => {
         setFormData({
           title: article.title || "",
           summary: article.summary || "",
-          section:
-            typeof article.section === "object"
-              ? article.section?._id
-              : article.section || "",
+          section: article.section || "",
           content: article.content || "",
-          author:
-            typeof article.author === "object"
-              ? article.author?._id
-              : article.author || "",
         });
 
         setStatus(article.status);
@@ -91,72 +71,9 @@ const ArticleEditor = () => {
     fetchArticle();
   }, [id, isEditing]);
 
-
-  // ==========================================
-  // FETCH SECTIONS
-  // ==========================================
-
-  useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        setSectionsLoading(true);
-
-        const response = await api.get("/sections");
-
-        setSections(response.data.sections || []);
-      } catch (err) {
-        console.error("Fetch sections error:", err);
-
-        setError(
-          err.response?.data?.message ||
-            "Failed to load sections."
-        );
-      } finally {
-        setSectionsLoading(false);
-      }
-    };
-
-    if (user?.role) {
-      fetchSections();
-    }
-  }, [user]);
-
-
-  // ==========================================
-  // FETCH WRITERS
-  // EDITOR CREATE FLOW
-  // ==========================================
-
-  useEffect(() => {
-    if (!isEditor || isEditing) return;
-
-    const fetchWriters = async () => {
-      try {
-        setWritersLoading(true);
-
-        const response = await api.get("/users/writers");
-
-        setWriters(response.data.users || []);
-      } catch (err) {
-        console.error("Fetch writers error:", err);
-
-        setError(
-          err.response?.data?.message ||
-            "Failed to load writers."
-        );
-      } finally {
-        setWritersLoading(false);
-      }
-    };
-
-    fetchWriters();
-  }, [isEditor, isEditing]);
-
-
-  // ==========================================
+  
   // HANDLE INPUT
-  // ==========================================
-
+  
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -169,11 +86,8 @@ const ArticleEditor = () => {
     setSuccess("");
   };
 
-
-  // ==========================================
+  
   // VALIDATE FORM
-  // ==========================================
-
   const validateForm = () => {
     if (!formData.title.trim()) {
       return "Title is required.";
@@ -183,23 +97,16 @@ const ArticleEditor = () => {
       return "Content is required.";
     }
 
-    if (!formData.section) {
+    if (!formData.section.trim()) {
       return "Section is required.";
-    }
-
-    // Editor must select writer while creating
-    if (isEditor && !isEditing && !formData.author) {
-      return "Please select a writer.";
     }
 
     return null;
   };
 
-
-  // ==========================================
-  // CREATE / UPDATE ARTICLE
-  // ==========================================
-
+  
+  // SAVE ARTICLE
+  
   const handleSave = async () => {
     const validationError = validateForm();
 
@@ -216,36 +123,14 @@ const ArticleEditor = () => {
       let response;
 
       if (isEditing) {
-        // Don't send author while editing
-        // Existing article author should remain unchanged.
-        const updateData = {
-          title: formData.title,
-          summary: formData.summary,
-          section: formData.section,
-          content: formData.content,
-        };
-
         response = await api.patch(
           `/articles/${id}`,
-          updateData
+          formData
         );
       } else {
-        // New article
-        const createData = {
-          title: formData.title,
-          summary: formData.summary,
-          section: formData.section,
-          content: formData.content,
-        };
-
-        // Editor must send selected writer
-        if (isEditor) {
-          createData.author = formData.author;
-        }
-
         response = await api.post(
           "/articles",
-          createData
+          formData
         );
       }
 
@@ -265,7 +150,6 @@ const ArticleEditor = () => {
           : "Article saved as draft successfully."
       );
 
-      // After creating, move to real edit URL
       if (!isEditing) {
         navigate(
           `/articles/${article._id}/edit`,
@@ -287,21 +171,10 @@ const ArticleEditor = () => {
     }
   };
 
-
   // ==========================================
   // SUBMIT ARTICLE
-  // ONLY WRITER SHOULD SUBMIT
   // ==========================================
-
   const handleSubmit = async () => {
-    // Editor should not submit article
-    if (isEditor) {
-      setError(
-        "Editors create and manage articles, but only the article writer can submit it for review."
-      );
-      return;
-    }
-
     const validationError = validateForm();
 
     if (validationError) {
@@ -309,7 +182,7 @@ const ArticleEditor = () => {
       return;
     }
 
-    // New article
+    // New article must first be saved
     if (!id) {
       try {
         setLoading(true);
@@ -318,12 +191,7 @@ const ArticleEditor = () => {
 
         const createResponse = await api.post(
           "/articles",
-          {
-            title: formData.title,
-            summary: formData.summary,
-            section: formData.section,
-            content: formData.content,
-          }
+          formData
         );
 
         const article = createResponse.data.article;
@@ -332,23 +200,17 @@ const ArticleEditor = () => {
           `/articles/${article._id}/submit`
         );
 
-        setStatus(
-          submitResponse.data.article.status
-        );
+        setStatus(submitResponse.data.article.status);
 
         setSuccess(
           "Article submitted for review successfully."
         );
 
-        setTimeout(() => {
-          navigate("/articles/my");
-        }, 800);
-
+        navigate(`/articles/${article._id}/edit`, {
+          replace: true,
+        });
       } catch (err) {
-        console.error(
-          "Submit article error:",
-          err
-        );
+        console.error("Submit article error:", err);
 
         setError(
           err.response?.data?.message ||
@@ -361,46 +223,25 @@ const ArticleEditor = () => {
       return;
     }
 
-
     // Existing article
     try {
       setLoading(true);
       setError("");
       setSuccess("");
 
-      // Save latest changes
-      await api.patch(
-        `/articles/${id}`,
-        {
-          title: formData.title,
-          summary: formData.summary,
-          section: formData.section,
-          content: formData.content,
-        }
-      );
-
-      // Submit
       const response = await api.post(
         `/articles/${id}/submit`
       );
 
-      setStatus(
-        response.data.article.status
-      );
+      setStatus(response.data.article.status);
 
       setSuccess(
         "Article submitted for review successfully."
       );
 
-      setTimeout(() => {
-        navigate("/articles/my");
-      }, 800);
-
+      navigate("/articles/my");
     } catch (err) {
-      console.error(
-        "Submit article error:",
-        err
-      );
+      console.error("Submit article error:", err);
 
       setError(
         err.response?.data?.message ||
@@ -411,311 +252,386 @@ const ArticleEditor = () => {
     }
   };
 
-
   // ==========================================
+  // STATUS STYLING
+  // ==========================================
+  const getStatusStyle = () => {
+    if (status === "CHANGES_REQUESTED") {
+      return "border-amber-200 bg-amber-50 text-amber-800";
+    }
+
+    if (status === "SUBMITTED") {
+      return "border-blue-200 bg-blue-50 text-blue-800";
+    }
+
+    if (status === "APPROVED") {
+      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    }
+
+    return "border-hairline bg-paper text-muted";
+  };
+
+  
   // LOADING
-  // ==========================================
-
+  
   if (fetching) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading article...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <header className="border-b border-hairline bg-paper">
+          <div className="mx-auto max-w-6xl px-6 py-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-press">
+              Editorial Workflow
+            </p>
+
+            <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight">
+              Loading article
+            </h1>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-6xl px-6 py-16">
+          <div className="border-y border-hairline py-10 text-center">
+            <p className="text-sm text-muted">
+              Loading article...
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
 
-
-  // ==========================================
+  
   // PAGE
-  // ==========================================
-
+  
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      {/* Top editorial accent */}
+      <div className="h-[3px] bg-press" />
 
       {/* Header */}
-
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-
+      <header className="border-b border-hairline bg-paper">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-press">
+              Editorial Workflow
+            </p>
+
+            <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight">
               {isEditing
                 ? "Edit Article"
                 : "Create Article"}
             </h1>
 
-            <p className="text-sm text-gray-500">
-              Editorial Workflow
+            <p className="mt-1 text-sm text-muted">
+              Write, refine and submit your story for editorial review.
             </p>
           </div>
 
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              status === "DRAFT"
-                ? "bg-gray-100 text-gray-700"
-                : status === "CHANGES_REQUESTED"
-                ? "bg-orange-100 text-orange-700"
-                : status === "SUBMITTED"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-green-100 text-green-700"
-            }`}
+          <div
+            className={`hidden items-center gap-2 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] sm:flex ${getStatusStyle()}`}
           >
-            {status}
-          </span>
-
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {status.replaceAll("_", " ")}
+          </div>
         </div>
       </header>
 
+      {/* Main */}
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="mb-7">
+          <BackButton />
+        </div>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+        {/* Mobile status */}
+        <div className="mb-6 sm:hidden">
+          <div
+            className={`inline-flex items-center gap-2 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] ${getStatusStyle()}`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {status.replaceAll("_", " ")}
+          </div>
+        </div>
 
-        <BackButton />
-
-
-        {/* Error */}
-
+        {/* Alerts */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+          <div className="mb-6 border-l-[3px] border-press bg-white px-5 py-4 shadow-sm">
+            <p className="text-sm font-semibold text-press">
+              Something went wrong
+            </p>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              {error}
+            </p>
           </div>
         )}
-
-
-        {/* Success */}
 
         {success && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
+          <div className="mb-6 border-l-[3px] border-emerald-700 bg-white px-5 py-4 shadow-sm">
+            <p className="text-sm font-semibold text-emerald-800">
+              Success
+            </p>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              {success}
+            </p>
           </div>
         )}
 
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
+          {/* Editor */}
+          <section className="border border-hairline bg-white">
+            <div className="border-b border-hairline px-6 py-5 sm:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                Story Draft
+              </p>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-
-
-          {/* ==================================
-              TITLE
-          ================================== */}
-
-          <div className="mb-6">
-
-            <label
-              htmlFor="title"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Title
-            </label>
-
-            <input
-              id="title"
-              name="title"
-              type="text"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter article title"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
-            />
-
-          </div>
-
-
-          {/* ==================================
-              WRITER
-              EDITOR CREATE ONLY
-          ================================== */}
-
-          {isEditor && !isEditing && (
-            <div className="mb-6">
-
-              <label
-                htmlFor="author"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Writer / Author
-              </label>
-
-              <select
-                id="author"
-                name="author"
-                value={formData.author}
-                onChange={handleChange}
-                disabled={writersLoading}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:opacity-50"
-              >
-
-                <option value="">
-                  {writersLoading
-                    ? "Loading writers..."
-                    : "Select writer"}
-                </option>
-
-                {writers.map((writer) => (
-                  <option
-                    key={writer._id}
-                    value={writer._id}
-                  >
-                    {writer.name} ({writer.email})
-                  </option>
-                ))}
-
-              </select>
-
+              <h2 className="mt-1 font-serif text-2xl font-semibold">
+                {isEditing
+                  ? "Refine your article"
+                  : "Start your article"}
+              </h2>
             </div>
-          )}
 
-
-          {/* ==================================
-              SECTION
-          ================================== */}
-
-          <div className="mb-6">
-
-            <label
-              htmlFor="section"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Section
-            </label>
-
-            <select
-              id="section"
-              name="section"
-              value={formData.section}
-              onChange={handleChange}
-              disabled={sectionsLoading}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:opacity-50"
-            >
-
-              <option value="">
-                {sectionsLoading
-                  ? "Loading sections..."
-                  : "Select section"}
-              </option>
-
-              {sections.map((section) => (
-                <option
-                  key={section._id}
-                  value={section._id}
+            <div className="px-6 py-7 sm:px-8">
+              {/* Title */}
+              <div className="mb-7">
+                <label
+                  htmlFor="title"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted"
                 >
-                  {section.name}
-                </option>
-              ))}
+                  Title <span className="text-press">*</span>
+                </label>
 
-            </select>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="Enter a clear and compelling headline"
+                  className="w-full border-0 border-b border-hairline bg-transparent px-0 py-3 font-serif text-2xl font-semibold text-ink outline-none transition placeholder:text-stone-400 focus:border-press sm:text-3xl"
+                />
+              </div>
 
-          </div>
-
-
-          {/* ==================================
-              SUMMARY
-          ================================== */}
-
-          <div className="mb-6">
-
-            <label
-              htmlFor="summary"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Summary
-            </label>
-
-            <textarea
-              id="summary"
-              name="summary"
-              value={formData.summary}
-              onChange={handleChange}
-              placeholder="Write a short summary..."
-              rows={3}
-              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
-            />
-
-          </div>
-
-
-          {/* ==================================
-              CONTENT
-          ================================== */}
-
-          <div className="mb-6">
-
-            <label
-              htmlFor="content"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Article Content
-            </label>
-
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Write your article..."
-              rows={16}
-              className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
-            />
-
-          </div>
-
-
-          {/* ==================================
-              ACTIONS
-          ================================== */}
-
-          <div className="flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
-
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              disabled={loading}
-              className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Cancel
-            </button>
-
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-
-              {/* Save Draft */}
-
-              {(status === "DRAFT" ||
-                status === "CHANGES_REQUESTED") && (
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              {/* Section */}
+              <div className="mb-7">
+                <label
+                  htmlFor="section"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted"
                 >
-                  {loading
-                    ? "Saving..."
-                    : "Save Draft"}
-                </button>
-              )}
+                  Section <span className="text-press">*</span>
+                </label>
 
+                <select
+                  id="section"
+                  name="section"
+                  value={formData.section}
+                  onChange={handleChange}
+                  className="w-full border border-hairline bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-press focus:ring-1 focus:ring-press/20"
+                >
+                  <option value="">
+                    Select section
+                  </option>
 
-              {/* Submit - WRITER ONLY */}
+                  <option value="Politics">
+                    Politics
+                  </option>
 
-              {isWriter &&
-                (status === "DRAFT" ||
+                  <option value="Culture">
+                    Culture
+                  </option>
+
+                  <option value="Technology">
+                    Technology
+                  </option>
+
+                  <option value="Sports">
+                    Sports
+                  </option>
+
+                  <option value="Business">
+                    Business
+                  </option>
+                </select>
+              </div>
+
+              {/* Summary */}
+              <div className="mb-7">
+                <label
+                  htmlFor="summary"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted"
+                >
+                  Summary
+                </label>
+
+                <textarea
+                  id="summary"
+                  name="summary"
+                  value={formData.summary}
+                  onChange={handleChange}
+                  placeholder="Write a short summary that captures the key point of the story..."
+                  rows={4}
+                  className="w-full resize-none border border-hairline bg-paper px-4 py-3 text-sm leading-6 text-ink outline-none transition placeholder:text-stone-400 focus:border-press focus:ring-1 focus:ring-press/20"
+                />
+
+                <p className="mt-2 text-xs text-muted">
+                  Give readers a quick understanding of what this article is about.
+                </p>
+              </div>
+
+              {/* Content */}
+              <div className="mb-2">
+                <label
+                  htmlFor="content"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted"
+                >
+                  Article Content <span className="text-press">*</span>
+                </label>
+
+                <textarea
+                  id="content"
+                  name="content"
+                  value={formData.content}
+                  onChange={handleChange}
+                  placeholder="Write your article here..."
+                  rows={18}
+                  className="w-full resize-y border border-hairline bg-paper px-4 py-4 text-[15px] leading-7 text-ink outline-none transition placeholder:text-stone-400 focus:border-press focus:ring-1 focus:ring-press/20"
+                />
+
+                <div className="mt-2 flex justify-between text-xs text-muted">
+                  <span>
+                    Write clearly and keep the article well structured.
+                  </span>
+
+                  <span>
+                    {formData.content.length} characters
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-4 border-t border-hairline bg-paper px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                disabled={loading}
+                className="border border-hairline bg-white px-5 py-2.5 text-sm font-medium text-muted transition hover:border-ink hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {(status === "DRAFT" ||
+                  status === "CHANGES_REQUESTED") && (
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="border border-ink bg-white px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading
+                      ? "Saving..."
+                      : "Save Draft"}
+                  </button>
+                )}
+
+                {(status === "DRAFT" ||
                   status === "CHANGES_REQUESTED") && (
                   <button
                     type="button"
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="bg-press px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8f2923] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading
                       ? "Submitting..."
                       : "Submit for Review"}
                   </button>
                 )}
+              </div>
+            </div>
+          </section>
 
+          {/* Editorial sidebar */}
+          <aside className="h-fit border-y border-hairline">
+            <div className="border-b border-hairline py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                Editorial Notes
+              </p>
             </div>
 
-          </div>
+            <div className="space-y-6 py-5">
+              <div>
+                <p className="font-serif text-lg font-semibold">
+                  Before you submit
+                </p>
 
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Make sure your headline, section and article content
+                  are complete before sending the story for review.
+                </p>
+              </div>
+
+              <div className="border-t border-hairline pt-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                  Required
+                </p>
+
+                <ul className="mt-3 space-y-2 text-sm text-muted">
+                  <li className="flex gap-2">
+                    <span className="text-press">•</span>
+                    Article title
+                  </li>
+
+                  <li className="flex gap-2">
+                    <span className="text-press">•</span>
+                    Section
+                  </li>
+
+                  <li className="flex gap-2">
+                    <span className="text-press">•</span>
+                    Article content
+                  </li>
+                </ul>
+              </div>
+
+              <div className="border-t border-hairline pt-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                  Workflow
+                </p>
+
+                <div className="mt-3 space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-6 w-6 items-center justify-center border border-hairline text-xs">
+                      1
+                    </span>
+                    <span className="text-muted">
+                      Save as draft
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-6 w-6 items-center justify-center border border-hairline text-xs">
+                      2
+                    </span>
+                    <span className="text-muted">
+                      Submit for review
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-6 w-6 items-center justify-center border border-hairline text-xs">
+                      3
+                    </span>
+                    <span className="text-muted">
+                      Editor approval
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
       </main>
     </div>
@@ -723,3 +639,4 @@ const ArticleEditor = () => {
 };
 
 export default ArticleEditor;
+

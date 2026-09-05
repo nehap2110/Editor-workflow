@@ -1,24 +1,29 @@
-/**
- * A labeled text input used across auth forms (and future forms).
- * Keeping this as a small, generic component avoids repeating the same
- * label + input markup and Tailwind classes in every form.
- */
-const FormInput = ({ label, type = "text", value, onChange, placeholder, required = false }) => {
+
+const FormInput = ({
+  label,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+}) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
         {label}
       </label>
+
       <input
         type={type}
         required={required}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-press focus:ring-1 focus:ring-press"
       />
     </div>
   );
 };
 
 export default FormInput;
+

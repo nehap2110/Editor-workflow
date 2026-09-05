@@ -1,3 +1,4 @@
+
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -99,31 +100,34 @@ const Navbar = () => {
   };
 
   const linkClass = (path) =>
-    `text-sm font-medium transition ${
+    `relative text-[13px] font-medium transition ${
       isActive(path)
-        ? "text-gray-900"
-        : "text-gray-500 hover:text-gray-900"
+        ? "text-press"
+        : "text-muted hover:text-ink"
     }`;
 
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <header className="border-b border-hairline bg-paper">
+      <div className="h-[3px] bg-press" />
 
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         {/* Logo */}
-
         <button
           onClick={() => navigate("/dashboard")}
-          className="text-lg font-bold text-gray-900"
+          className="group shrink-0 text-left"
         >
-          Editorial Workflow
+          <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-press">
+            Editorial
+          </p>
+
+          <p className="font-serif text-xl font-semibold tracking-tight text-ink transition group-hover:text-press">
+            Workflow
+          </p>
         </button>
 
         {/* Navigation */}
-
         <nav className="hidden items-center gap-6 md:flex">
-
           {/* Common */}
-
           <button
             onClick={() => navigate("/dashboard")}
             className={linkClass("/dashboard")}
@@ -159,16 +163,12 @@ const Navbar = () => {
 
           {user?.role === "editor" && (
             <>
-              {/* Review */}
-
               <button
                 onClick={() => navigate("/editor/review")}
                 className={linkClass("/editor/review")}
               >
                 Review Articles
               </button>
-
-              {/* Scheduled Articles */}
 
               <button
                 onClick={() => navigate("/editor/scheduled")}
@@ -178,27 +178,25 @@ const Navbar = () => {
               </button>
 
               {/* Alerts */}
-
               <button
                 onClick={() => navigate("/editor/alerts")}
                 className={`${linkClass(
                   "/editor/alerts"
-                )} relative`}
+                )} flex items-center gap-1.5`}
               >
                 Alerts
 
                 {overdueCount > 0 && (
-                  <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white">
+                  <span className="inline-flex min-w-5 items-center justify-center border border-press bg-press px-1.5 py-0.5 text-[10px] font-semibold text-white">
                     {overdueCount}
                   </span>
                 )}
               </button>
 
               {/* Export Calendar */}
-
               <button
                 onClick={handleExportCalendar}
-                className="text-sm font-medium text-gray-500 transition hover:text-gray-900"
+                className="text-[13px] font-medium text-muted transition hover:text-ink"
               >
                 Export Calendar
               </button>
@@ -215,7 +213,6 @@ const Navbar = () => {
           >
             Published
           </button>
-
         </nav>
 
         {/* ==========================================
@@ -223,31 +220,27 @@ const Navbar = () => {
         ========================================== */}
 
         <div className="flex items-center gap-4">
-
-          <div className="hidden text-right sm:block">
-
-            <p className="text-sm font-medium text-gray-900">
+          <div className="hidden border-l border-hairline pl-4 text-right sm:block">
+            <p className="text-sm font-medium text-ink">
               {user?.name}
             </p>
 
-            <p className="text-xs capitalize text-gray-500">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-muted">
               {user?.role}
             </p>
-
           </div>
 
           <button
             onClick={logout}
-            className="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+            className="border border-hairline bg-white px-4 py-2 text-[13px] font-medium text-ink transition hover:border-press hover:bg-press hover:text-white"
           >
             Log out
           </button>
-
         </div>
-
       </div>
     </header>
   );
 };
 
 export default Navbar;
+

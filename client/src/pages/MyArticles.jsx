@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -37,22 +38,22 @@ const MyArticles = () => {
   const getStatusClass = (status) => {
     switch (status) {
       case "DRAFT":
-        return "bg-gray-100 text-gray-700";
+        return "border-hairline bg-paper text-muted";
 
       case "SUBMITTED":
-        return "bg-yellow-100 text-yellow-700";
+        return "border-amber-200 bg-amber-50 text-amber-800";
 
       case "CHANGES_REQUESTED":
-        return "bg-orange-100 text-orange-700";
+        return "border-orange-200 bg-orange-50 text-orange-800";
 
       case "APPROVED":
-        return "bg-green-100 text-green-700";
+        return "border-green-200 bg-green-50 text-green-800";
 
       case "PUBLISHED":
-        return "bg-blue-100 text-blue-700";
+        return "border-blue-200 bg-blue-50 text-blue-800";
 
       default:
-        return "bg-gray-100 text-gray-700";
+        return "border-hairline bg-paper text-muted";
     }
   };
 
@@ -70,32 +71,46 @@ const MyArticles = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600">
-          Loading your articles...
-        </p>
+      <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <div className="h-[3px] bg-press" />
+
+        <div className="flex min-h-[calc(100vh-3px)] items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-hairline border-t-press" />
+            <p className="text-sm text-muted">
+              Loading your articles...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+      {/* Top accent */}
+      <div className="h-[3px] bg-press" />
+
       {/* Header */}
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <header className="border-b border-hairline bg-paper">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-press">
+              Editorial Workflow
+            </p>
+
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-ink">
               My Articles
             </h1>
 
-            <p className="text-sm text-gray-500">
-              Manage your articles and track their status.
+            <p className="mt-1 text-sm text-muted">
+              Manage your articles and track their editorial status.
             </p>
           </div>
 
           <button
             onClick={() => navigate("/articles/new")}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="shrink-0 border border-press bg-press px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#8f2b25]"
           >
             + New Article
           </button>
@@ -104,120 +119,172 @@ const MyArticles = () => {
 
       {/* Main */}
       <main className="mx-auto max-w-6xl px-6 py-8">
-          {/*back button */}
-          
-          <div className="mb-6">
-         <BackButton label="Back to Dashboard" />
-         </div>
+        {/* Back button */}
+        <div className="mb-7">
+          <BackButton label="Back to Dashboard" />
+        </div>
 
+        {/* Page intro */}
+        <div className="mb-7 border-y border-hairline py-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                Your newsroom
+              </p>
+
+              <h2 className="mt-1 font-serif text-2xl font-semibold text-ink">
+                Article Desk
+              </h2>
+            </div>
+
+            <p className="text-sm text-muted">
+              {articles.length}{" "}
+              {articles.length === 1 ? "article" : "articles"} in your
+              workspace
+            </p>
+          </div>
+        </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+          <div className="mb-6 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p className="font-medium">Unable to load articles</p>
+            <p className="mt-1">{error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!error && articles.length === 0 && (
-          <div className="rounded-xl border bg-white p-10 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900">
-              No articles yet
-            </h2>
+          <div className="border border-hairline bg-white px-6 py-16 text-center">
+            <div className="mx-auto max-w-md">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-press">
+                Your desk is quiet
+              </p>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Create your first article to get started.
-            </p>
+              <h2 className="mt-3 font-serif text-3xl font-semibold text-ink">
+                No articles yet
+              </h2>
 
-            <button
-              onClick={() => navigate("/articles/new")}
-              className="mt-6 rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              Create Article
-            </button>
+              <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted">
+                Create your first article and start building your
+                editorial queue.
+              </p>
+
+              <button
+                onClick={() => navigate("/articles/new")}
+                className="mt-7 border border-press bg-press px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#8f2b25]"
+              >
+                Create Article
+              </button>
+            </div>
           </div>
         )}
 
         {/* Articles */}
         {articles.length > 0 && (
-          <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+          <div className="border border-hairline bg-white">
+            {/* Table heading */}
+            <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
+              <div>
+                <p className="font-serif text-lg font-semibold text-ink">
+                  Article Archive
+                </p>
+
+                <p className="mt-0.5 text-xs text-muted">
+                  Recent articles appear first.
+                </p>
+              </div>
+
+              <span className="hidden text-[11px] font-semibold uppercase tracking-[0.16em] text-muted sm:block">
+                Editorial Desk
+              </span>
+            </div>
+
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-hairline bg-paper">
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       Article
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       Section
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       Status
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       Created
                     </th>
 
-                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       Action
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {articles.map((article) => (
+                <tbody>
+                  {articles.map((article, index) => (
                     <tr
                       key={article._id}
-                      className="hover:bg-gray-50"
+                      className={`border-b border-hairline last:border-b-0 transition hover:bg-[#fcfcf9] ${
+                        index % 2 === 1 ? "bg-[#fdfdfb]" : "bg-white"
+                      }`}
                     >
                       {/* Article */}
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">
-                          {article.title}
-                        </div>
+                      <td className="px-5 py-5 align-top">
+                        <div className="max-w-md">
+                          <h3 className="font-serif text-lg font-semibold leading-snug text-ink">
+                            {article.title}
+                          </h3>
 
-                        {article.summary && (
-                          <div className="mt-1 max-w-md truncate text-sm text-gray-500">
-                            {article.summary}
-                          </div>
-                        )}
+                          {article.summary && (
+                            <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-muted">
+                              {article.summary}
+                            </p>
+                          )}
+                        </div>
                       </td>
 
                       {/* Section */}
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                       {article.section?.name || "-"}
+                      <td className="px-5 py-5 align-top">
+                        <span className="text-sm font-medium text-ink">
+                          {article.section?.name || "-"}
+                        </span>
                       </td>
 
                       {/* Status */}
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-5 align-top">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
+                          className={`inline-flex items-center border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getStatusClass(
                             article.status
                           )}`}
                         >
-                          {article.status}
+                          {article.status.replaceAll("_", " ")}
                         </span>
                       </td>
 
                       {/* Created */}
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {article.createdAt
-                          ? new Date(
-                              article.createdAt
-                            ).toLocaleDateString()
-                          : "-"}
+                      <td className="px-5 py-5 align-top">
+                        <span className="text-sm text-muted">
+                          {article.createdAt
+                            ? new Date(
+                                article.createdAt
+                              ).toLocaleDateString()
+                            : "-"}
+                        </span>
                       </td>
 
                       {/* Action */}
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-5 py-5 text-right align-top">
                         <button
                           onClick={() =>
                             handleArticleAction(article)
                           }
-                          className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                          className="border border-hairline px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink transition hover:border-press hover:bg-press hover:text-white"
                         >
                           {article.status === "DRAFT" ||
                           article.status ===
@@ -239,3 +306,4 @@ const MyArticles = () => {
 };
 
 export default MyArticles;
+

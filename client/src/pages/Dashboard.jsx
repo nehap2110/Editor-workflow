@@ -18,6 +18,7 @@ const Dashboard = () => {
         setLoading(true);
 
         const response = await api.get("/dashboard");
+
         setDashboard(response.data);
       } catch (error) {
         console.error("Dashboard error:", error);
@@ -32,60 +33,54 @@ const Dashboard = () => {
   }, [user]);
 
   const stats = dashboard?.stats || {};
-
-  const statusBreakdown =
-    dashboard?.statusBreakdown || [];
-
-  const sectionBreakdown =
-    dashboard?.sectionBreakdown || [];
-
-  const publishedPerWeek =
-    dashboard?.publishedPerWeek || [];
+  const statusBreakdown = dashboard?.statusBreakdown || [];
+  const sectionBreakdown = dashboard?.sectionBreakdown || [];
+  const publishedPerWeek = dashboard?.publishedPerWeek || [];
 
   const isEditor = user?.role === "editor";
   const isWriter = user?.role === "writer";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-paper font-sans text-ink antialiased">
+
+      {/* Editorial accent */}
+      <div className="h-[3px] bg-press" />
+
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <main className="mx-auto max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
 
         {/* ======================================
-            WELCOME HEADER
+            PAGE HEADER
         ====================================== */}
-        <section className="mb-10">
+        <section className="mb-10 border-b border-hairline pb-8">
 
-          <div className="flex flex-col gap-5 rounded-2xl border border-gray-100 bg-white/80 p-6 shadow-sm backdrop-blur-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-blue-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                Editorial Workspace
-              </div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-press">
+                Editorial Dashboard
+              </p>
 
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              <h1 className="font-serif text-4xl font-semibold leading-tight tracking-tight text-ink sm:text-5xl">
                 Welcome, {user?.name}
-              </h2>
+              </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500 sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base">
                 {isEditor
                   ? "Manage your editorial workflow, sections and publishing activity."
                   : "Manage your articles and editorial workflow."}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </div>
-
+            {/* Role */}
+            <div className="flex items-center gap-3 border-l-2 border-press pl-4">
               <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {user?.name}
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
+                  Current Role
                 </p>
 
-                <p className="text-xs capitalize text-gray-500">
+                <p className="mt-1 font-serif text-lg font-semibold capitalize text-ink">
                   {user?.role}
                 </p>
               </div>
@@ -96,50 +91,46 @@ const Dashboard = () => {
 
 
         {/* ======================================
-            MAIN STATISTICS
+            WORKFLOW OVERVIEW
         ====================================== */}
         <section className="mb-10">
 
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-5 flex items-end justify-between border-b border-hairline pb-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-press">
                 Overview
               </p>
 
-              <h3 className="mt-1 text-xl font-bold text-gray-900">
+              <h2 className="mt-1 font-serif text-2xl font-semibold text-ink">
                 Workflow Statistics
-              </h3>
+              </h2>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 border-l border-t border-hairline sm:grid-cols-4">
 
             <StatCard
               title="In Review"
               value={stats.inReview}
               loading={loading}
-              accent="blue"
             />
 
             <StatCard
               title="Scheduled This Week"
               value={stats.scheduledThisWeek}
               loading={loading}
-              accent="purple"
             />
 
             <StatCard
               title="Published This Week"
               value={stats.publishedThisWeek}
               loading={loading}
-              accent="green"
             />
 
             <StatCard
               title="Open Drafts"
               value={stats.openDrafts}
               loading={loading}
-              accent="orange"
             />
 
           </div>
@@ -149,203 +140,151 @@ const Dashboard = () => {
         {/* ======================================
             BREAKDOWNS
         ====================================== */}
-        <section className="mb-10 grid gap-6 lg:grid-cols-2">
+        <section className="mb-10 grid gap-8 lg:grid-cols-2">
 
           {/* Articles by Status */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition duration-200 hover:shadow-md">
-
-            <div className="mb-6 flex items-center justify-between">
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-                  Workflow
-                </p>
-
-                <h3 className="mt-1 text-lg font-bold text-gray-900">
-                  Articles by Status
-                </h3>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                ✓
-              </div>
-
-            </div>
-
+          <BreakdownCard
+            eyebrow="Workflow"
+            title="Articles by Status"
+          >
             {loading ? (
-              <div className="space-y-4">
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-              </div>
+              <LoadingRows />
             ) : statusBreakdown.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-500">
-                  No articles found.
-                </p>
-              </div>
+              <EmptyState text="No articles found." />
             ) : (
-              <div className="space-y-3">
-
+              <div className="divide-y divide-hairline">
                 {statusBreakdown.map((item) => (
                   <div
                     key={item._id}
-                    className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 transition hover:border-blue-100 hover:bg-blue-50/50"
+                    className="flex items-center justify-between py-4"
                   >
-                    <span className="text-sm font-medium text-gray-600">
+                    <span className="text-sm text-muted">
                       {formatStatus(item._id)}
                     </span>
 
-                    <span className="rounded-lg bg-white px-3 py-1 text-sm font-bold text-gray-900 shadow-sm">
+                    <span className="min-w-9 rounded-full border border-hairline bg-paper px-3 py-1 text-center text-sm font-semibold text-ink">
                       {item.count}
                     </span>
                   </div>
                 ))}
-
               </div>
             )}
-
-          </div>
+          </BreakdownCard>
 
 
           {/* Articles by Section */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition duration-200 hover:shadow-md">
-
-            <div className="mb-6 flex items-center justify-between">
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-                  Content
-                </p>
-
-                <h3 className="mt-1 text-lg font-bold text-gray-900">
-                  Articles by Section
-                </h3>
-              </div>
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                ▦
-              </div>
-
-            </div>
-
+          <BreakdownCard
+            eyebrow="Content"
+            title="Articles by Section"
+          >
             {loading ? (
-              <div className="space-y-4">
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-                <div className="h-4 animate-pulse rounded bg-gray-100" />
-              </div>
+              <LoadingRows />
             ) : sectionBreakdown.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-500">
-                  No articles found.
-                </p>
-              </div>
+              <EmptyState text="No articles found." />
             ) : (
-              <div className="space-y-3">
-
+              <div className="divide-y divide-hairline">
                 {sectionBreakdown.map((item) => (
                   <div
                     key={item.sectionId}
-                    className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 transition hover:border-blue-100 hover:bg-blue-50/50"
+                    className="flex items-center justify-between py-4"
                   >
-                    <span className="text-sm font-medium text-gray-600">
+                    <span className="text-sm text-muted">
                       {item.sectionName}
                     </span>
 
-                    <span className="rounded-lg bg-white px-3 py-1 text-sm font-bold text-gray-900 shadow-sm">
+                    <span className="min-w-9 rounded-full border border-hairline bg-paper px-3 py-1 text-center text-sm font-semibold text-ink">
                       {item.count}
                     </span>
                   </div>
                 ))}
-
               </div>
             )}
-
-          </div>
+          </BreakdownCard>
 
         </section>
 
 
         {/* ======================================
-            PUBLISHED LAST 8 WEEKS
+            PUBLISHED ARTICLES CHART
         ====================================== */}
-        <section className="mb-10 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-7">
+        <section className="mb-10 border-y border-hairline bg-white">
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="border-b border-hairline px-5 py-6 sm:px-7">
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-                Publishing Activity
-              </p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-press">
+              Publishing Activity
+            </p>
 
-              <h3 className="mt-1 text-xl font-bold text-gray-900">
-                Published Articles — Last 8 Weeks
-              </h3>
+            <h2 className="mt-1 font-serif text-2xl font-semibold text-ink">
+              Published Articles — Last 8 Weeks
+            </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
-                Weekly publishing activity across the editorial workflow.
-              </p>
-            </div>
+            <p className="mt-2 text-sm text-muted">
+              Weekly publishing activity across the editorial workflow.
+            </p>
 
           </div>
 
 
-          <div className="mt-8 flex h-64 items-end gap-2 border-b border-gray-100 pb-0 sm:gap-4">
+          <div className="px-5 py-7 sm:px-7">
 
-            {loading ? (
-              <div className="flex h-full w-full items-center justify-center">
-                <p className="text-sm text-gray-500">
-                  Loading chart...
-                </p>
-              </div>
-            ) : publishedPerWeek.length === 0 ? (
-              <div className="flex h-full w-full items-center justify-center">
-                <p className="text-sm text-gray-500">
-                  No publishing data available.
-                </p>
-              </div>
-            ) : (
-              publishedPerWeek.map((item) => {
+            <div className="flex h-64 items-end gap-2 border-b border-hairline sm:gap-4">
 
-                const maxCount = Math.max(
-                  ...publishedPerWeek.map(
-                    (week) => week.count
-                  ),
-                  1
-                );
+              {loading ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <p className="text-sm text-muted">
+                    Loading chart...
+                  </p>
+                </div>
+              ) : publishedPerWeek.length === 0 ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <p className="text-sm text-muted">
+                    No publishing data available.
+                  </p>
+                </div>
+              ) : (
+                publishedPerWeek.map((item) => {
 
-                const height =
-                  (item.count / maxCount) * 100;
+                  const maxCount = Math.max(
+                    ...publishedPerWeek.map(
+                      (week) => week.count
+                    ),
+                    1
+                  );
 
-                return (
-                  <div
-                    key={item.week}
-                    className="group flex h-full flex-1 flex-col items-center justify-end"
-                  >
+                  const height =
+                    (item.count / maxCount) * 100;
 
-                    <span className="mb-2 text-xs font-bold text-gray-700 opacity-0 transition group-hover:opacity-100">
-                      {item.count}
-                    </span>
-
+                  return (
                     <div
-                      className="w-full max-w-12 rounded-t-lg bg-blue-600 transition-all duration-300 group-hover:bg-blue-700"
-                      style={{
-                        height: `${Math.max(
-                          height,
-                          item.count > 0 ? 5 : 1
-                        )}%`,
-                      }}
-                    />
+                      key={item.week}
+                      className="group flex h-full flex-1 flex-col items-center justify-end"
+                    >
 
-                    <span className="mt-2 whitespace-nowrap text-[11px] text-gray-400">
-                      {formatWeek(item.week)}
-                    </span>
+                      <span className="mb-2 text-xs font-semibold text-ink opacity-0 transition-opacity group-hover:opacity-100">
+                        {item.count}
+                      </span>
 
-                  </div>
-                );
-              })
-            )}
+                      <div
+                        className="w-full max-w-12 rounded-t-sm bg-press transition-opacity group-hover:opacity-80"
+                        style={{
+                          height: `${Math.max(
+                            height,
+                            item.count > 0 ? 5 : 1
+                          )}%`,
+                        }}
+                      />
+
+                      <span className="mt-2 whitespace-nowrap text-[11px] text-muted">
+                        {formatWeek(item.week)}
+                      </span>
+
+                    </div>
+                  );
+                })
+              )}
+
+            </div>
 
           </div>
         </section>
@@ -356,24 +295,22 @@ const Dashboard = () => {
         ====================================== */}
         <section>
 
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
+          <div className="mb-5 border-b border-hairline pb-3">
+
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-press">
               Workspace
             </p>
 
-            <h3 className="mt-1 text-xl font-bold text-gray-900">
+            <h2 className="mt-1 font-serif text-2xl font-semibold text-ink">
               Quick Actions
-            </h3>
+            </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Jump directly to the tools you use most.
-            </p>
           </div>
 
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-            {/* COMMON: CREATE ARTICLE */}
+            {/* CREATE ARTICLE */}
             {(isWriter || isEditor) && (
               <ActionCard
                 title="Create Article"
@@ -388,7 +325,7 @@ const Dashboard = () => {
             )}
 
 
-            {/* WRITER ONLY */}
+            {/* MY ARTICLES */}
             {isWriter && (
               <ActionCard
                 title="My Articles"
@@ -399,7 +336,7 @@ const Dashboard = () => {
             )}
 
 
-            {/* COMMON: PUBLISHED */}
+            {/* PUBLISHED */}
             {(isWriter || isEditor) && (
               <ActionCard
                 title="Published Articles"
@@ -410,13 +347,13 @@ const Dashboard = () => {
             )}
 
 
-            {/* EDITOR ONLY */}
+            {/* EDITOR ACTIONS */}
             {isEditor && (
               <>
                 <ActionCard
                   title="Review Articles"
                   description="Review submitted articles and approve or request changes."
-                  button="Review"
+                  button="Review Articles"
                   onClick={() =>
                     navigate("/editor/review")
                   }
@@ -425,7 +362,7 @@ const Dashboard = () => {
                 <ActionCard
                   title="Approved Articles"
                   description="Schedule approved articles or publish them immediately."
-                  button="Manage"
+                  button="Manage Articles"
                   onClick={() =>
                     navigate("/editor/approved")
                   }
@@ -452,7 +389,6 @@ const Dashboard = () => {
             )}
 
           </div>
-
         </section>
 
       </main>
@@ -469,50 +405,50 @@ const StatCard = ({
   title,
   value,
   loading,
-  accent = "blue",
-}) => {
+}) => (
+  <div className="border-b border-r border-hairline bg-white p-5 transition-colors hover:bg-[#f6f5ef]">
 
-  const accentStyles = {
-    blue: "bg-blue-50 text-blue-600",
-    purple: "bg-purple-50 text-purple-600",
-    green: "bg-green-50 text-green-600",
-    orange: "bg-orange-50 text-orange-600",
-  };
+    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+      {title}
+    </p>
 
-  return (
-    <div className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <p className="mt-3 font-serif text-4xl font-semibold text-ink">
+      {loading ? "..." : value ?? 0}
+    </p>
 
-      <div className="flex items-start justify-between">
+    <div className="mt-4 h-[2px] w-8 bg-press" />
 
-        <div>
-          <p className="text-sm font-medium text-gray-500">
-            {title}
-          </p>
+  </div>
+);
 
-          <p className="mt-3 text-3xl font-bold tracking-tight text-gray-900">
-            {loading ? "..." : value ?? 0}
-          </p>
-        </div>
 
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold ${accentStyles[accent]}`}
-        >
-          {loading ? "…" : value ?? 0}
-        </div>
+/* ==========================================
+   BREAKDOWN CARD
+========================================== */
 
-      </div>
+const BreakdownCard = ({
+  eyebrow,
+  title,
+  children,
+}) => (
+  <div className="border-y border-hairline bg-white px-5 sm:px-7">
 
-      <div className="mt-5 h-1 overflow-hidden rounded-full bg-gray-100">
-        <div
-          className={`h-full w-1/3 rounded-full transition-all duration-500 ${accentStyles[accent]
-            .split(" ")[0]
-            .replace("bg-", "bg-")}`}
-        />
-      </div>
+    <div className="border-b border-hairline py-5">
+
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-press">
+        {eyebrow}
+      </p>
+
+      <h3 className="mt-1 font-serif text-xl font-semibold text-ink">
+        {title}
+      </h3>
 
     </div>
-  );
-};
+
+    {children}
+
+  </div>
+);
 
 
 /* ==========================================
@@ -525,19 +461,23 @@ const ActionCard = ({
   button,
   onClick,
 }) => (
-  <div className="group flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-lg">
+  <div className="group flex min-h-[220px] flex-col border border-hairline bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:border-press hover:shadow-sm">
 
     <div className="flex-1">
 
-      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-lg font-bold text-blue-600 transition duration-200 group-hover:bg-blue-600 group-hover:text-white">
-        →
+      <div className="mb-5 flex items-center gap-3">
+        <span className="h-[2px] w-6 bg-press transition-all duration-200 group-hover:w-10" />
+
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+          Action
+        </span>
       </div>
 
-      <h3 className="text-lg font-bold text-gray-900">
+      <h3 className="font-serif text-xl font-semibold text-ink">
         {title}
       </h3>
 
-      <p className="mt-2 text-sm leading-6 text-gray-500">
+      <p className="mt-3 text-sm leading-6 text-muted">
         {description}
       </p>
 
@@ -545,7 +485,7 @@ const ActionCard = ({
 
     <button
       onClick={onClick}
-      className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className="mt-6 inline-flex w-fit items-center gap-2 border-b-2 border-press pb-1 text-sm font-semibold text-ink transition-colors hover:text-press"
     >
       {button}
       <span className="transition-transform duration-200 group-hover:translate-x-1">
@@ -553,6 +493,38 @@ const ActionCard = ({
       </span>
     </button>
 
+  </div>
+);
+
+
+/* ==========================================
+   LOADING ROWS
+========================================== */
+
+const LoadingRows = () => (
+  <div className="divide-y divide-hairline">
+    {[1, 2, 3].map((item) => (
+      <div
+        key={item}
+        className="flex items-center justify-between py-4"
+      >
+        <div className="h-4 w-28 animate-pulse rounded bg-hairline" />
+        <div className="h-7 w-10 animate-pulse rounded-full bg-hairline" />
+      </div>
+    ))}
+  </div>
+);
+
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+const EmptyState = ({ text }) => (
+  <div className="py-8 text-center">
+    <p className="text-sm text-muted">
+      {text}
+    </p>
   </div>
 );
 

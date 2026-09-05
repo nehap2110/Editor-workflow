@@ -4,16 +4,16 @@ const BackButton = ({ label = "Back" }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-   navigate("/dashboard");
+    navigate("/dashboard");
   };
 
   return (
     <button
       type="button"
       onClick={handleBack}
-      className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+      className="inline-flex items-center gap-2 border border-hairline bg-paper px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted transition hover:border-press hover:text-press"
     >
-      <span>←</span>
+      <span className="text-base leading-none">←</span>
       {label}
     </button>
   );
