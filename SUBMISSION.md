@@ -2,7 +2,7 @@
 
 ## Links
 
-* **GitHub repository:** `https://github.com/nehap2110/Editor-workflow`
+* **GitHub repository:** `https://github.com/nehap2110/Editorial-workflow`
 * **Live application:** `https://editor-workflow.vercel.app`
 
 ## Notes for the reviewer
