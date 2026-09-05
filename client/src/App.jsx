@@ -1,8 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+import PublicRoute from "./routes/PublicRoute.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 import EditorReview from "./pages/EditorReview";
 import ArticleEditor from "./pages/ArticleEditor";
 import MyArticles from "./pages/MyArticles";
@@ -15,6 +18,15 @@ import OverdueAlerts from "./pages/OverdueAlerts";
 import SectionManagement from "./pages/SectionManagement";
 import SectionDetail from "./pages/SectionDetail";
 import ScheduledArticles from "./pages/ScheduledArticles.jsx";
+
+/**
+ * Sends unknown routes to a sensible starting point: signed-in users go
+ * to their dashboard, signed-out visitors go to the landing page.
+ */
+const NotFoundFallback = () => {
+  const { token } = useAuth();
+  return <Navigate to={token ? "/dashboard" : "/"} replace />;
+};
 
 function App() {
   return (
@@ -29,8 +41,15 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <Landing />
+          </PublicRoute>
+        }
+      />
+      <Route path="*" element={<NotFoundFallback />} />
 
      <Route path="/editor/review"
          element={
