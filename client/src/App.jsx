@@ -159,9 +159,11 @@ function App() {
        <Route
   path="/editor/scheduled"
   element={
+    <ProtectedRoute>
     <RoleRoute allowedRoles={["editor"]}>
       <ScheduledArticles />
     </RoleRoute>
+    </ProtectedRoute>
   }
 />
 

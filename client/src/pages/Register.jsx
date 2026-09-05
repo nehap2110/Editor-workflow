@@ -4,12 +4,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 import FormInput from "../components/FormInput.jsx";
 import Button from "../components/Button.jsx";
 
-/**
- * Public registration always creates a "writer" account on the backend
- * (see backend/src/controllers/authController.js), so this form does
- * not offer a role selector - there is nothing for the user to choose.
- */
-const Register = () => {
+
+  const Register = () => {
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,80 +13,139 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+const handleSubmit = async (e) => {
+e.preventDefault();
+setError("");
+setIsSubmitting(true);
 
-    try {
-      await register(name, email, password);
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Something went wrong. Please try again.";
-      setError(message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-1">
-          Create an account
-        </h1>
-        <p className="text-sm text-gray-500 mb-6">
-          New accounts are registered as writers
+try {
+  await register(name, email, password);
+} catch (err) {
+  const message =
+    err.response?.data?.message ||
+    "Something went wrong. Please try again.";
+  setError(message);
+} finally {
+  setIsSubmitting(false);
+}
+
+
+};
+
+return ( <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center px-4 py-10"> <div className="w-full max-w-md">
+
+
+    {/* Back to Home */}
+    <Link
+      to="/"
+      className="inline-flex items-center gap-2 mb-5 text-sm font-medium text-gray-600 hover:text-blue-600 transition duration-200"
+    >
+      <span className="text-lg">←</span>
+      Back to Home
+    </Link>
+
+    {/* Register Card */}
+    <div className="bg-white border border-gray-100 rounded-2xl shadow-xl p-8 sm:p-10">
+
+      {/* Logo / Brand */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
+          <span className="text-white font-bold text-sm">EW</span>
+        </div>
+
+        <div>
+          <h1 className="text-lg font-bold text-gray-900">
+            Editorial Workflow
+          </h1>
+          <p className="text-xs text-gray-500">
+            Content management platform
+          </p>
+        </div>
+      </div>
+
+      {/* Heading */}
+      <div className="mb-7">
+        <h2 className="text-3xl font-bold text-gray-900">
+          Create your account
+        </h2>
+
+        <p className="mt-2 text-sm text-gray-500">
+          New accounts are registered as writers.
         </p>
+      </div>
 
-        {error && (
-          <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
-            {error}
-          </div>
-        )}
+      {/* Info */}
+      <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+        <p className="text-sm text-blue-800">
+          Your account will be created with the{" "}
+          <span className="font-semibold">Writer</span> role.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <FormInput
-            label="Name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Jane Doe"
-          />
+      {/* Error */}
+      {error && (
+        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-          <FormInput
-            label="Email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="jane@example.com"
-          />
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <FormInput
+          label="Name"
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Jane Doe"
+        />
 
-          <FormInput
-            label="Password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
-          />
+        <FormInput
+          label="Email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="jane@example.com"
+        />
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating account..." : "Register"}
-          </Button>
-        </form>
+        <FormInput
+          label="Password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="At least 6 characters"
+        />
 
-        <p className="text-sm text-gray-500 mt-4 text-center">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Create account"}
+        </Button>
+      </form>
+
+      {/* Login Link */}
+      <div className="mt-7 pt-6 border-t border-gray-100 text-center">
+        <p className="text-sm text-gray-500">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition duration-200"
+          >
             Sign in
           </Link>
         </p>
       </div>
     </div>
-  );
+
+    <p className="mt-5 text-center text-xs text-gray-400">
+      Join your editorial team and start creating
+    </p>
+  </div>
+</div>
+
+
+);
 };
 
 export default Register;
